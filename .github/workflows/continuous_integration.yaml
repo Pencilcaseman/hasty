@@ -29,6 +29,10 @@ jobs:
           rustup component add rustfmt
           rustup component add clippy
 
+      - name: Install OpenBLAS
+        run: |
+          sudo apt-get install libopenblas-dev
+
       - name: Compile and Test (Debug)
         run: |
           cargo build
