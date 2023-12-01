@@ -3,22 +3,34 @@
 
 #include <stdint.h>
 
-enum StorageOrder {
-    RowMajor = 101,
-    ColMajor = 102
+#ifndef HASTY_BLAS_IMPL_ACCELERATE
+enum CBLAS_ORDER { CblasRowMajor = 101, CblasColMajor = 102 };
+
+enum CBLAS_TRANSPOSE {
+	CblasNoTrans	 = 111,
+	CblasTrans		 = 112,
+	CblasConjTrans	 = 113,
+	CblasConjNoTrans = 114
 };
 
-enum Transpose {
-    NoTrans = 111,
-    Conj = 114,
-    Trans = 112,
-    ConjTrans = 113,
+enum CBLAS_UPLO { CblasUpper = 121, CblasLower = 122 };
+enum CBLAS_DIAG { CblasNonUnit = 131, CblasUnit = 132 };
+enum CBLAS_SIDE { CblasLeft = 141, CblasRight = 142 };
+#endif
+
+enum HastyBlasImpl {
+    HastyBlasImplGeneric,
+    HastyBlasImplAccelerate,
+    HastyBlasImplOpenBlas,
+    HastyBlasImplMkl,
 };
 
-int hasty_test_function(int x);
+enum HastyBlasImpl hasty_blas_get_impl();
 
-#ifdef HASTY_BLAS_IMPL_ACCELERATE
+#if defined(HASTY_BLAS_IMPL_ACCELERATE)
 #   include <config/accelerate.h>
+#elif defined(HASTY_BLAS_IMPL_OPENBLAS)
+#   include <config/openblas.h>
 #endif
 
 #include "level3/gemm.h"

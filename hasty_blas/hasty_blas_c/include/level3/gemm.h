@@ -1,10 +1,12 @@
 #ifndef HASTY_BLAS_C_GEMM_H
 #define HASTY_BLAS_C_GEMM_H
 
+#include "../hasty_blas_c.h"
+
 void hasty_blas_sgemm(
-            enum StorageOrder order,
-            enum Transpose trans_a,
-            enum Transpose trans_b,
+            enum CBLAS_ORDER order,
+            enum CBLAS_TRANSPOSE trans_a,
+            enum CBLAS_TRANSPOSE trans_b,
             uint64_t m,
             uint64_t n,
             uint64_t k,
@@ -19,9 +21,9 @@ void hasty_blas_sgemm(
 );
 
 void hasty_blas_dgemm(
-            enum StorageOrder order,
-            enum Transpose trans_a,
-            enum Transpose trans_b,
+            enum CBLAS_ORDER order,
+            enum CBLAS_TRANSPOSE trans_a,
+            enum CBLAS_TRANSPOSE trans_b,
             uint64_t m,
             uint64_t n,
             uint64_t k,

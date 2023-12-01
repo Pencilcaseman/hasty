@@ -1,5 +1,5 @@
-#ifndef HASTY_BLAS_C_ACCELERATE_HPP
-#define HASTY_BLAS_C_ACCELERATE_HPP
+#ifndef HASTY_BLAS_C_ACCELERATE_H
+#define HASTY_BLAS_C_ACCELERATE_H
 
 #ifdef BLASINT
 #	define CBLAS_INT BLASINT
@@ -20,4 +20,4 @@
 #undef negativeInfinity
 #endif
 
-#endif // HASTY_BLAS_C_ACCELERATE_HPP
+#endif // HASTY_BLAS_C_ACCELERATE_H

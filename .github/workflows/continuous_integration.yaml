@@ -1,0 +1,50 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - "**"
+  workflow_dispatch:
+  workflow_call:
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout LibRapid
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Get latest CMake and ninja
+        uses: lukka/get-cmake@latest
+
+      - name: Update Rust
+        run: |
+          rustup update
+          rustup component add rustfmt
+          rustup component add clippy
+
+      - name: Compile and Test (Debug)
+        run: |
+          cargo build
+          cargo test
+
+      - name: Compile and Test (Release)
+        run: |
+          cargo build --release
+          cargo test --release
+
+      - name: Benchmark
+        run: |
+          cargo bench
+
+      - name: Store Benchmark Results
+        uses: actions/upload-artifact@v2
+        with:
+          name: benchmark-results
+          path: target/criterion

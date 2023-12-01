@@ -4,7 +4,16 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 
 fn main() {
-    let dst = cmake::Config::new("hasty_blas_c").build();
+    // Read HASTY_BLAS_PATH environment variable if it exists
+
+    let mut cmaker = cmake::Config::new("hasty_blas_c");
+
+    if let Ok(path) = env::var("HASTY_BLAS_PATH") {
+        // panic!("Defined");
+        cmaker.define("HASTY_BLAS_PATH", path);
+    }
+
+    let dst = cmaker.build();
 
     println!("cargo:rustc-link-search=native={}/lib", dst.display());
     println!("cargo:rustc-link-lib=static=hasty_blas_c");
@@ -25,7 +34,18 @@ fn main() {
                 println!("cargo:rustc-link-lib=framework=Accelerate");
             }
             _ => {
-                panic!("Unknown BLAS library: {}", line);
+                // println!("cargo:rustc-link-lib={}", line);
+
+                // Get path and filename
+                let path = PathBuf::from(line);
+                let filename = path.file_name().unwrap().to_str().unwrap();
+
+                // Strip 'lib' prefix and any extension
+                let filename = filename.strip_prefix("lib").unwrap_or(filename);
+                let filename = filename.split(".").next().unwrap_or(filename);
+
+                println!("cargo:rustc-link-search=native={}", path.parent().unwrap().display());
+                println!("cargo:rustc-link-lib=static={}", filename);
             }
         }
     }
