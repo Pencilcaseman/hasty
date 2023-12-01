@@ -241,13 +241,13 @@ pub mod level3 {
     /// let m: u64 = 2;
     /// let n: u64 = 1;
     /// let k: u64 = 3;
-    /// let a: Vec<f32> = vec![1, 2, 3,
-    ///                        4, 5, 6];
-    /// let b: Vec<f32> = vec![1,
-    ///                        2,
-    ///                        3];
-    /// let c: Vec<f32> = vec![0,
-    ///                        0];
+    /// let a: Vec<f32> = vec![1.0, 2.0, 3.0,
+    ///                        4.0, 5.0, 6.0];
+    /// let b: Vec<f32> = vec![1.0,
+    ///                        2.0,
+    ///                        3.0];
+    /// let c: Vec<f32> = vec![0.0,
+    ///                        0.0];
     /// let alpha: f32 = 1.0;
     /// let beta: f32 = 0.0;
     /// hasty::level3::gemm(
