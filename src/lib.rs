@@ -246,7 +246,7 @@ pub mod level3 {
     /// let b: Vec<f32> = vec![1.0,
     ///                        2.0,
     ///                        3.0];
-    /// let c: Vec<f32> = vec![0.0,
+    /// let mut c: Vec<f32> = vec![0.0,
     ///                        0.0];
     /// let alpha: f32 = 1.0;
     /// let beta: f32 = 0.0;
