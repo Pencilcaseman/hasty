@@ -251,9 +251,9 @@ pub mod level3 {
     /// let alpha: f32 = 1.0;
     /// let beta: f32 = 0.0;
     /// hasty::level3::gemm(
-    ///     StorageOrder::RowMajor,
-    ///     Transpose::NoTrans,
-    ///     Transpose::NoTrans,
+    ///     hasty::StorageOrder::RowMajor,
+    ///     hasty::Transpose::NoTrans,
+    ///     hasty::Transpose::NoTrans,
     ///     m,
     ///     n,
     ///     k,
