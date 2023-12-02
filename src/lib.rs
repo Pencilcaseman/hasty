@@ -190,9 +190,13 @@ pub mod level3 {
 
     /// General matrix multiplication.
     ///
-    /// Compute $c := \alpha \text{op}_1(a) \text{op}_2(b) + \beta c$, where $a$ is a
-    /// $m \times k$ matrix, $b$ is a $k \times n$ matrix, $c$ is a
-    /// $m \times n$ matrix, and $\alpha$ and $\beta$ are scalars.
+    /// Compute `c := alpha * op(a) * op(b) + beta * c`, where `a` is an
+    /// `m x k` matrix, `b` is a `k x n` matrix, `c` is an `m x n` matrix,
+    /// `alpha` and `beta` are scalars, and `op` is one of:
+    /// * `op(x) = x`
+    /// * `op(x) = x^T`
+    /// * `op(x) = x^H`
+    /// where `x` is a matrix.
     ///
     /// # Type Parameters
     ///
@@ -223,19 +227,11 @@ pub mod level3 {
     ///
     /// # Example
     ///
-    /// $$\left( \begin{array}{cc}
-    ///     1 & 2 & 3 \\\\
-    ///     4 & 5 & 6
-    /// \end{array} \right) \times
-    /// \left( \begin{array}{cc}
-    ///     1 \\\\
-    ///     2 \\\\
-    ///     3
-    /// \end{array} \right) =
-    /// \left( \begin{array}{cc}
-    ///     14 \\\\
-    ///     32
-    /// \end{array} \right)$$
+    /// ```none
+    /// [[1 2 3]    [[1]      [[14]
+    ///  [4 5 6]] x  [2]   =   [32]]
+    ///              [3]]
+    /// ```
     ///
     /// ```rust
     /// let m: u64 = 2;
@@ -247,7 +243,7 @@ pub mod level3 {
     ///                        2.0,
     ///                        3.0];
     /// let mut c: Vec<f32> = vec![0.0,
-    ///                        0.0];
+    ///                            0.0];
     /// let alpha: f32 = 1.0;
     /// let beta: f32 = 0.0;
     /// hasty::level3::gemm(
