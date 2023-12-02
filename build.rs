@@ -4,10 +4,9 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 
 fn main() {
-    // Read HASTY_BLAS_PATH environment variable if it exists
-
     let mut cmaker = cmake::Config::new("hasty_blas_c");
 
+    // Read HASTY_BLAS_PATH environment variable if it exists
     if let Ok(path) = env::var("HASTY_BLAS_PATH") {
         // panic!("Defined");
         cmaker.define("HASTY_BLAS_PATH", path);
