@@ -1,27 +1,9 @@
-[//]: # (<style>)
+<img src="https://raw.githubusercontent.com/Pencilcaseman/hasty/master/img/logo_dark_mode.png" alt="Hasty Logo" style="margin-left: auto; margin-right: auto; display: block; width: 75%;">
 
-[//]: # (  picture {)
-
-[//]: # (    display: block;)
-
-[//]: # (    margin-left: auto;)
-
-[//]: # (    margin-right: auto;)
-
-[//]: # (    width: 75%;)
-
-[//]: # (  })
-
-[//]: # (</style>)
-
-<a href="https://github.com/Pencilcaseman/hasty">
-    <picture style="margin-left: auto; margin-right: auto; display: block; width: 75%;">
-      <source
-        srcset="https://raw.githubusercontent.com/Pencilcaseman/hasty/master/img/logo_dark_mode.png" 
-        media="(prefers-color-scheme: dark)">
-      <img src="https://raw.githubusercontent.com/Pencilcaseman/hasty/master/img/logo_light_mode.png" alt="Hasty Logo">
-    </picture>
-</a>
+[![Crates.io](https://img.shields.io/crates/v/hasty)](https://crates.io/crates/hasty)
+[![Documentation](https://docs.rs/hasty/badge.svg)](https://docs.rs/hasty)
+[![License](https://img.shields.io/crates/l/hasty)](https://github.com/Pencilcaseman/hasty/blob/master/LICENSE)
+[![Continuous Integration](https://github.com/Pencilcaseman/hasty/actions/workflows/continuous_integration.yaml/badge.svg)](https://github.com/Pencilcaseman/hasty/actions/workflows/continuous_integration.yaml)
 
 # Hasty
 
