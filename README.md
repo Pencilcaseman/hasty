@@ -1,18 +1,25 @@
-<style>
-  picture {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    width: 75%;
-  }
-</style>
+[//]: # (<style>)
+
+[//]: # (  picture {)
+
+[//]: # (    display: block;)
+
+[//]: # (    margin-left: auto;)
+
+[//]: # (    margin-right: auto;)
+
+[//]: # (    width: 75%;)
+
+[//]: # (  })
+
+[//]: # (</style>)
 
 <a href="https://github.com/Pencilcaseman/hasty">
-    <picture>
+    <picture style="margin-left: auto; margin-right: auto; display: block; width: 75%;">
       <source
         srcset="https://raw.githubusercontent.com/Pencilcaseman/hasty/master/img/logo_dark_mode.png" 
         media="(prefers-color-scheme: dark)">
-      <img src="https://raw.githubusercontent.com/Pencilcaseman/hasty/master/img/logo_light_mode.png">
+      <img src="https://raw.githubusercontent.com/Pencilcaseman/hasty/master/img/logo_light_mode.png" alt="Hasty Logo">
     </picture>
 </a>
 
