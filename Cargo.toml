@@ -1,6 +1,6 @@
 [package]
 name = "hasty"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Toby Davis"]
 description = "A Rust interface to system BLAS libraries for fast linear algebra operations"
 edition = "2021"
