@@ -11,6 +11,8 @@
 #![warn(missing_docs)]
 #![warn(clippy::pedantic, clippy::nursery)]
 
+mod hasty_blas_c;
+
 /// Represents the storage order of a matrix.
 pub enum StorageOrder {
     /// Row-major storage order.
@@ -36,20 +38,20 @@ pub enum Transpose {
 }
 
 /// Given a storage order, convert it to the FFI representation.
-fn order_ffi(order: StorageOrder) -> hasty_blas::CBLAS_ORDER {
+fn order_ffi(order: StorageOrder) -> hasty_blas_c::CBLAS_ORDER {
     match order {
-        StorageOrder::RowMajor => hasty_blas::CBLAS_ORDER_CblasRowMajor,
-        StorageOrder::ColMajor => hasty_blas::CBLAS_ORDER_CblasColMajor,
+        StorageOrder::RowMajor => hasty_blas_c::CBLAS_ORDER_CblasRowMajor,
+        StorageOrder::ColMajor => hasty_blas_c::CBLAS_ORDER_CblasColMajor,
     }
 }
 
 /// Given a transpose operation, convert it to the FFI representation.
-fn transpose_ffi(transpose: Transpose) -> hasty_blas::CBLAS_TRANSPOSE {
+fn transpose_ffi(transpose: Transpose) -> hasty_blas_c::CBLAS_TRANSPOSE {
     match transpose {
-        Transpose::NoTrans => hasty_blas::CBLAS_TRANSPOSE_CblasNoTrans,
-        Transpose::Conj => hasty_blas::CBLAS_TRANSPOSE_CblasConjNoTrans,
-        Transpose::Trans => hasty_blas::CBLAS_TRANSPOSE_CblasTrans,
-        Transpose::ConjTrans => hasty_blas::CBLAS_TRANSPOSE_CblasConjTrans,
+        Transpose::NoTrans => hasty_blas_c::CBLAS_TRANSPOSE_CblasNoTrans,
+        Transpose::Conj => hasty_blas_c::CBLAS_TRANSPOSE_CblasConjNoTrans,
+        Transpose::Trans => hasty_blas_c::CBLAS_TRANSPOSE_CblasTrans,
+        Transpose::ConjTrans => hasty_blas_c::CBLAS_TRANSPOSE_CblasConjTrans,
     }
 }
 
@@ -82,27 +84,25 @@ impl std::fmt::Display for BlasLibrary {
 
 /// Get the BLAS library begin used.
 pub fn get_blas_library() -> BlasLibrary {
-    let lib = unsafe { hasty_blas::hasty_blas_get_impl() };
+    let lib = unsafe { hasty_blas_c::hasty_blas_get_impl() };
     match lib {
-        hasty_blas::HastyBlasImpl_HastyBlasImplGeneric => BlasLibrary::Generic,
-        hasty_blas::HastyBlasImpl_HastyBlasImplAccelerate => BlasLibrary::Accelerate,
-        hasty_blas::HastyBlasImpl_HastyBlasImplOpenBlas => BlasLibrary::OpenBlas,
-        hasty_blas::HastyBlasImpl_HastyBlasImplMkl => BlasLibrary::Mkl,
+        hasty_blas_c::HastyBlasImpl_HastyBlasImplGeneric => BlasLibrary::Generic,
+        hasty_blas_c::HastyBlasImpl_HastyBlasImplAccelerate => BlasLibrary::Accelerate,
+        hasty_blas_c::HastyBlasImpl_HastyBlasImplOpenBlas => BlasLibrary::OpenBlas,
+        hasty_blas_c::HastyBlasImpl_HastyBlasImplMkl => BlasLibrary::Mkl,
         _ => panic!("Unknown BLAS library"),
     }
 }
 
 /// Level 3 BLAS routines, which perform matrix-matrix operations.
 pub mod level3 {
-    use crate::{order_ffi, StorageOrder, Transpose, transpose_ffi};
-
     /// Trait for general matrix multiplication.
     pub trait Gemm where Self: Sized {
         /// General matrix multiplication. See [`gemm`](fn.gemm.html) for more
         /// information.
-        fn gemm(order: StorageOrder,
-                trans_a: Transpose,
-                trans_b: Transpose,
+        fn gemm(order: crate::StorageOrder,
+                trans_a: crate::Transpose,
+                trans_b: crate::Transpose,
                 m: u64,
                 n: u64,
                 k: u64,
@@ -117,9 +117,9 @@ pub mod level3 {
     }
 
     impl Gemm for f32 {
-        fn gemm(order: StorageOrder,
-                trans_a: Transpose,
-                trans_b: Transpose,
+        fn gemm(order: crate::StorageOrder,
+                trans_a: crate::Transpose,
+                trans_b: crate::Transpose,
                 m: u64,
                 n: u64,
                 k: u64,
@@ -132,10 +132,10 @@ pub mod level3 {
                 c: &mut [Self],
                 ldc: u64) {
             unsafe {
-                hasty_blas::hasty_blas_sgemm(
-                    order_ffi(order),
-                    transpose_ffi(trans_a),
-                    transpose_ffi(trans_b),
+                crate::hasty_blas_c::hasty_blas_sgemm(
+                    crate::order_ffi(order),
+                    crate::transpose_ffi(trans_a),
+                    crate::transpose_ffi(trans_b),
                     m,
                     n,
                     k,
@@ -153,9 +153,9 @@ pub mod level3 {
     }
 
     impl Gemm for f64 {
-        fn gemm(order: StorageOrder,
-                trans_a: Transpose,
-                trans_b: Transpose,
+        fn gemm(order: crate::StorageOrder,
+                trans_a: crate::Transpose,
+                trans_b: crate::Transpose,
                 m: u64,
                 n: u64,
                 k: u64,
@@ -168,10 +168,10 @@ pub mod level3 {
                 c: &mut [Self],
                 ldc: u64) {
             unsafe {
-                hasty_blas::hasty_blas_dgemm(
-                    order_ffi(order),
-                    transpose_ffi(trans_a),
-                    transpose_ffi(trans_b),
+                crate::hasty_blas_c::hasty_blas_dgemm(
+                    crate::order_ffi(order),
+                    crate::transpose_ffi(trans_a),
+                    crate::transpose_ffi(trans_b),
                     m,
                     n,
                     k,
@@ -270,9 +270,9 @@ pub mod level3 {
     /// ```
     ///
     pub fn gemm<T: Gemm>(
-        order: StorageOrder,
-        trans_a: Transpose,
-        trans_b: Transpose,
+        order: crate::StorageOrder,
+        trans_a: crate::Transpose,
+        trans_b: crate::Transpose,
         m: u64,
         n: u64,
         k: u64,
