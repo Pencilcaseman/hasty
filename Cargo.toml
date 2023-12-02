@@ -5,8 +5,15 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[workspace]
+resolver = "2"
+members = [
+    ".",
+    "hasty_blas",
+]
+
 [dependencies]
-hasty_blas = { path = "hasty_blas" }
+hasty_blas = { version = "0.1.0", path = "hasty_blas" }
 
 [dev-dependencies]
 criterion = { version = "0.4", features = ["html_reports"] }
