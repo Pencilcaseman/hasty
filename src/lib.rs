@@ -11,8 +11,8 @@
 #![warn(missing_docs)]
 #![warn(clippy::pedantic, clippy::nursery)]
 
-// #![doc(html_favicon_url = "/img/logo_dark_mode.png")]
-// #![doc(html_logo_url = "")]
+#![doc(html_favicon_url = "https://raw.githubusercontent.com/Pencilcaseman/hasty/master/img/logo_dark_mode.png")]
+#![doc(html_logo_url = "https://raw.githubusercontent.com/Pencilcaseman/hasty/master/img/logo_dark_mode.png")]
 
 mod hasty_blas_c;
 
