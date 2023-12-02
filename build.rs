@@ -4,6 +4,11 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 
 fn main() {
+    // std::fs::copy("img/logo_dark_mode.ico", "target/doc/logo_dark_mode.ico")
+    //     .expect("Failed to copy crate favicon when building documentation.");
+    std::fs::copy("img/logo_dark_mode.png", "target/doc/logo_dark_mode.png")
+        .expect("Failed to copy crate logo when building documentation.");
+
     // Read HASTY_BLAS_PATH environment variable if it exists
 
     let mut cmaker = cmake::Config::new("hasty_blas_c");
