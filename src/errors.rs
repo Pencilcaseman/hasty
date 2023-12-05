@@ -4,6 +4,8 @@
 //! BLAS functions to indicate what, if anything, went
 //! wrong with the function call
 
+use std::fmt::Formatter;
+
 /// An enum representing the different possible errors
 /// the [`gemm`](fn.gemm.html) function can output
 pub enum GemmError {
@@ -21,4 +23,65 @@ pub enum GemmError {
     Ldb,
     /// LDC is invalid (must be at least `n`)
     Ldc,
+}
+
+impl std::fmt::Debug for GemmError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            GemmError::MatA => write!(f, "Invalid Matrix A"),
+            GemmError::MatB => write!(f, "Invalid Matrix B"),
+            GemmError::MatC => write!(f, "Invalid Matrix C"),
+            GemmError::Lda => write!(f, "Invalid Lda"),
+            GemmError::Ldb => write!(f, "Invalid Ldb"),
+            GemmError::Ldc => write!(f, "Invalid Ldc"),
+        }
+    }
+}
+
+impl std::fmt::Display for GemmError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            GemmError::MatA => write!(f, "Invalid Matrix A"),
+            GemmError::MatB => write!(f, "Invalid Matrix B"),
+            GemmError::MatC => write!(f, "Invalid Matrix C"),
+            GemmError::Lda => write!(f, "Invalid Lda"),
+            GemmError::Ldb => write!(f, "Invalid Ldb"),
+            GemmError::Ldc => write!(f, "Invalid Ldc"),
+        }
+    }
+}
+
+pub enum GemvError {
+    MatA,
+    VecX,
+    VecY,
+    Lda,
+    IncX,
+    IncY,
+}
+
+impl std::fmt::Debug for GemvError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match self {
+            GemvError::MatA => write!(f, "Invalid Matrix A"),
+            GemvError::VecX => write!(f, "Invalid Vector X"),
+            GemvError::VecY => write!(f, "Invalid Vector Y"),
+            GemvError::Lda => write!(f, "Invalid Lda"),
+            GemvError::IncX => write!(f, "Invalid IncX"),
+            GemvError::IncY => write!(f, "Invalid IncY"),
+        }
+    }
+}
+
+impl std::fmt::Display for GemvError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            GemvError::MatA => write!(f, "Invalid Matrix A"),
+            GemvError::VecX => write!(f, "Invalid Vector X"),
+            GemvError::VecY => write!(f, "Invalid Vector Y"),
+            GemvError::Lda => write!(f, "Invalid Lda"),
+            GemvError::IncX => write!(f, "Invalid IncX"),
+            GemvError::IncY => write!(f, "Invalid IncY"),
+        }
+    }
 }

@@ -11,10 +11,10 @@
 #![warn(missing_docs)]
 #![warn(clippy::pedantic, clippy::nursery)]
 #![doc(
-    html_favicon_url = "https://raw.githubusercontent.com/Pencilcaseman/hasty/master/img/logo_dark_mode.png"
+html_favicon_url = "https://raw.githubusercontent.com/Pencilcaseman/hasty/master/img/logo_dark_mode.png"
 )]
 #![doc(
-    html_logo_url = "https://raw.githubusercontent.com/Pencilcaseman/hasty/master/img/logo_dark_mode.png"
+html_logo_url = "https://raw.githubusercontent.com/Pencilcaseman/hasty/master/img/logo_dark_mode.png"
 )]
 
 pub mod errors;
@@ -133,8 +133,8 @@ pub fn get_blas_library() -> BlasLibrary {
 pub mod level3 {
     /// Trait for general matrix multiplication.
     pub trait Gemm
-    where
-        Self: Sized,
+        where
+            Self: Sized,
     {
         /// General matrix multiplication. See [`gemm`](fn.gemm.html) for more
         /// information.
@@ -284,6 +284,7 @@ pub mod level3 {
     /// let m: u64 = 2;
     /// let n: u64 = 1;
     /// let k: u64 = 3;
+    ///
     /// let a: Vec<f32> = vec![1.0, 2.0, 3.0,
     ///                        4.0, 5.0, 6.0];
     /// let b: Vec<f32> = vec![1.0,
@@ -291,27 +292,42 @@ pub mod level3 {
     ///                        3.0];
     /// let mut c: Vec<f32> = vec![0.0,
     ///                            0.0];
+    ///
     /// let alpha: f32 = 1.0;
     /// let beta: f32 = 0.0;
-    /// hasty::level3::gemm(
+    ///
+    /// // Calculate the product of a and b, storing the result in c
+    /// if let Err(e) = hasty::level3::gemm(
     ///     hasty::StorageOrder::RowMajor,
     ///     hasty::Transpose::NoTrans,
     ///     hasty::Transpose::NoTrans,
     ///     m,
     ///     n,
     ///     k,
-    ///     alpha,
+    ///     1.0,
     ///     &a,
     ///     k,
     ///     &b,
     ///     n,
-    ///     beta,
+    ///     0.0,
     ///     &mut c,
-    ///     n);
+    ///     n,
+    /// ) {
+    ///     // Handle the various errors that could occur. Most of the time, you can
+    ///     // probably just panic or print the error
+    ///     use hasty::errors::GemmError;
+    ///     match e {
+    ///         GemmError::MatA => println!("Invalid Matrix A"),
+    ///         GemmError::MatB => println!("Invalid Matrix B"),
+    ///         GemmError::MatC => println!("Invalid Matrix C"),
+    ///         GemmError::Lda => println!("Invalid Lda"),
+    ///         GemmError::Ldb => println!("Invalid Ldb"),
+    ///         GemmError::Ldc => println!("Invalid Ldc"),
+    ///     }
+    /// }
     ///
     /// println!("Result: {:?}", c); // [14.0, 32.0]
     /// ```
-    ///
     pub fn gemm<T: Gemm>(
         order: crate::StorageOrder,
         trans_a: crate::Transpose,
@@ -329,9 +345,9 @@ pub mod level3 {
         ldc: u64,
     ) -> Result<(), crate::errors::GemmError> {
         // Check dimensions and strides are valid
-        assert_eq!(a.len() as u64, m * k);
-        assert_eq!(b.len() as u64, k * n);
-        assert_eq!(c.len() as u64, m * n);
+        if a.len() as u64 != m * k { return Err(crate::errors::GemmError::MatA); }
+        if b.len() as u64 != k * n { return Err(crate::errors::GemmError::MatB); }
+        if c.len() as u64 != m * n { return Err(crate::errors::GemmError::MatC); }
 
         crate::validate_ld(
             &order,
@@ -372,8 +388,8 @@ pub mod level3 {
 pub mod level2 {
     /// Trait for general matrix-vector multiplication
     pub trait Gemv
-    where
-        Self: Sized,
+        where
+            Self: Sized,
     {
         /// General matrix-vector multiplication. See [`gemv`](fn.gemv.html) for
         /// more information.
@@ -386,10 +402,10 @@ pub mod level2 {
             a: &[Self],
             lda: u64,
             x: &[Self],
-            inc_x: u64,
+            inc_x: i64,
             beta: Self,
             y: &mut [Self],
-            inc_y: u64,
+            inc_y: i64,
         );
     }
 
@@ -403,10 +419,10 @@ pub mod level2 {
             a: &[Self],
             lda: u64,
             x: &[Self],
-            inc_x: u64,
+            inc_x: i64,
             beta: Self,
             y: &mut [Self],
-            inc_y: u64,
+            inc_y: i64,
         ) {
             unsafe {
                 crate::hasty_blas_c::hasty_blas_sgemv(
@@ -445,11 +461,27 @@ pub mod level2 {
     ///
     /// * `order`: The storage order of the matrix
     /// * `trans`: Whether to transpose `a`
+    /// * `m`: The number of rows in `a` and elements in `y`
+    /// * `n`: The number of columns in `a` and elements in `x`
+    /// * `alpha`: The scalar `alpha`
+    /// * `a`: The matrix `a`
+    /// * `lda`: The leading dimension of `a`
+    /// * `x`: The vector `x`
+    /// * `inc_x`: The increment of `x`
+    /// * `beta`: The scalar `beta`
+    /// * `y`: The vector `y`
+    /// * `inc_y`: The increment of `y`
     ///
     /// # Panics
     ///
     /// * `a.len() != m * n`
-    /// * TODO: Better error checking... Not sure exactly what conditions are required
+    /// * `x.len() != n`
+    /// * `y.len() != m`
+    /// * `lda < cols of op(a)`
+    /// * `inc_x == 0`
+    /// * `inc_y == 0`
+    /// * `x.len() < 1 + (n - 1) * inc_x.unsigned_abs()`
+    /// * `y.len() < 1 + (m - 1) * inc_y.unsigned_abs()`
     ///
     /// # Example
     ///
@@ -463,7 +495,8 @@ pub mod level2 {
     /// let b: Vec<f32> = vec![1.0, 2.0, 3.0];
     /// let mut c: Vec<f32> = vec![0.0, 0.0];
     ///
-    /// hasty::level2::gemv(
+    /// // Compute matrix-vector product
+    /// if let Err(e) = hasty::level2::gemv(
     ///     hasty::StorageOrder::RowMajor,
     ///     hasty::Transpose::NoTrans,
     ///     2,
@@ -476,11 +509,20 @@ pub mod level2 {
     ///     0.0,
     ///     &mut c,
     ///     1,
-    /// );
+    /// ) {
+    ///     // Handle various errors -- you can probably just panic on most of these.
+    ///     match e {
+    ///         hasty::errors::GemvError::MatA => println!("Invalid Matrix A"),
+    ///         hasty::errors::GemvError::VecX => println!("Invalid Vector X"),
+    ///         hasty::errors::GemvError::VecY => println!("Invalid Vector Y"),
+    ///         hasty::errors::GemvError::Lda => println!("Invalid Lda"),
+    ///         hasty::errors::GemvError::IncX => println!("Invalid IncX"),
+    ///         hasty::errors::GemvError::IncY => println!("Invalid IncY"),
+    ///     }
+    /// }
     ///
     /// println!("GEMV Result: {:?}", c);
     /// ```
-    ///
     pub fn gemv<T: Gemv>(
         order: crate::StorageOrder,
         trans: crate::Transpose,
@@ -490,12 +532,33 @@ pub mod level2 {
         a: &[T],
         lda: u64,
         x: &[T],
-        inc_x: u64,
+        inc_x: i64,
         beta: T,
         y: &mut [T],
-        inc_y: u64,
-    ) {
+        inc_y: i64,
+    ) -> Result<(), crate::errors::GemvError> {
+        if a.len() != (m * n) as usize { return Err(crate::errors::GemvError::MatA); }
+        if x.len() != n as usize { return Err(crate::errors::GemvError::VecX); }
+        if y.len() != m as usize { return Err(crate::errors::GemvError::VecY); }
+
+        crate::validate_ld(
+            &order,
+            &trans,
+            &m,
+            &n,
+            &lda,
+            crate::errors::GemvError::Lda,
+        )?;
+
+        if inc_x == 0 { return Err(crate::errors::GemvError::IncX); }
+        if inc_y == 0 { return Err(crate::errors::GemvError::IncY); }
+
+        if x.len() < (1 + (n - 1) * inc_x.unsigned_abs()) as usize { return Err(crate::errors::GemvError::IncX); }
+        if y.len() < (1 + (m - 1) * inc_y.unsigned_abs()) as usize { return Err(crate::errors::GemvError::IncY); }
+
         T::gemv(order, trans, m, n, alpha, a, lda, x, inc_x, beta, y, inc_y);
+
+        Ok(())
     }
 }
 

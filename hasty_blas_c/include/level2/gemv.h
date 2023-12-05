@@ -12,10 +12,10 @@ void hasty_blas_sgemv(
     const float *a,
     uint64_t lda,
     const float *x,
-    uint64_t inc_x,
+    int64_t inc_x,
     float beta,
     float *y,
-    uint64_t inc_y
+    int64_t inc_y
 );
 
 
@@ -28,10 +28,10 @@ void hasty_blas_dgemv(
     const double *a,
     uint64_t lda,
     const double  *x,
-    uint64_t inc_x,
+    int64_t inc_x,
     double beta,
     double *y,
-    uint64_t inc_y
+    int64_t inc_y
 );
 
 #endif // HASTY_BLAS_C_GEMV_H
