@@ -42,6 +42,10 @@ jobs:
           cargo build --release
           cargo test --release
 
+      - name: Dry Release
+        run: |
+          cargo publish --dry-run
+
       - name: Benchmark
         run: |
           cargo bench
