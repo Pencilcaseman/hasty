@@ -7,7 +7,7 @@ edition = "2021"
 readme = "README.md"
 repository = "https://github.com/Pencilcaseman/hasty"
 license = "MIT"
-keywords = ["blas", "linear-algebra", "high-performance-computing", "matrix", "vector", "rust"]
+keywords = ["blas", "linear-algebra", "matrix", "vector"]
 
 [dev-dependencies]
 criterion = { version = "0.4", features = ["html_reports"] }
