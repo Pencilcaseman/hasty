@@ -8,6 +8,7 @@ use std::fmt::Formatter;
 
 /// An enum representing the different possible errors
 /// the [`gemm`](fn.gemm.html) function can output
+#[derive(PartialEq)]
 pub enum GemmError {
     /// Matrix A has invalid size (must be `m x k`)
     MatA,
@@ -51,12 +52,21 @@ impl std::fmt::Display for GemmError {
     }
 }
 
+/// An enum representing the different possible errors
+/// the [`gemv`](fn.gemv.html) function can output
+#[derive(PartialEq)]
 pub enum GemvError {
+    /// Matrix A has invalid size (must be `m x n`)
     MatA,
+    /// Vector X has invalid size (must be `n`)
     VecX,
+    /// Vector Y has invalid size (must be `m`)
     VecY,
+    /// LDA is invalid (must be at least `n`)
     Lda,
+    /// IncX is invalid (cannot be zero)
     IncX,
+    /// IncY is invalid (cannot be zero)
     IncY,
 }
 

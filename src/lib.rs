@@ -583,7 +583,7 @@ mod tests {
             b[i as usize] = i as f32 + 1.0;
         }
 
-        level3::gemm(
+        if let Err(_) = level3::gemm(
             StorageOrder::RowMajor,
             Transpose::NoTrans,
             Transpose::NoTrans,
@@ -598,8 +598,460 @@ mod tests {
             0.0,
             &mut c,
             n,
-        );
+        ) {
+            panic!("Invalid parameters");
+        }
 
         assert_eq!(c, vec![14.0, 32.0]);
+    }
+
+    #[test]
+    fn test_gemm_invalid_lda() {
+        let m: u64 = 2;
+        let n: u64 = 1;
+        let k: u64 = 3;
+        let mut a: Vec<f32> = vec![0.0; (m * k) as usize];
+        let mut b: Vec<f32> = vec![0.0; (k * n) as usize];
+        let mut c: Vec<f32> = vec![0.0; (m * n) as usize];
+
+        for i in 0..(m * k) {
+            a[i as usize] = i as f32 + 1.0;
+        }
+
+        for i in 0..(k * n) {
+            b[i as usize] = i as f32 + 1.0;
+        }
+
+        if let Err(e) = level3::gemm(
+            StorageOrder::RowMajor,
+            Transpose::NoTrans,
+            Transpose::NoTrans,
+            m,
+            n,
+            k,
+            1.0,
+            &a,
+            k - 1,
+            &b,
+            n,
+            0.0,
+            &mut c,
+            n,
+        ) {
+            assert_eq!(e, errors::GemmError::Lda);
+        } else {
+            panic!("Invalid parameters");
+        }
+    }
+
+    #[test]
+    fn test_gemm_invalid_ldb() {
+        let m: u64 = 2;
+        let n: u64 = 1;
+        let k: u64 = 3;
+        let mut a: Vec<f32> = vec![0.0; (m * k) as usize];
+        let mut b: Vec<f32> = vec![0.0; (k * n) as usize];
+        let mut c: Vec<f32> = vec![0.0; (m * n) as usize];
+
+        for i in 0..(m * k) {
+            a[i as usize] = i as f32 + 1.0;
+        }
+
+        for i in 0..(k * n) {
+            b[i as usize] = i as f32 + 1.0;
+        }
+
+        if let Err(e) = level3::gemm(
+            StorageOrder::RowMajor,
+            Transpose::NoTrans,
+            Transpose::NoTrans,
+            m,
+            n,
+            k,
+            1.0,
+            &a,
+            k,
+            &b,
+            n - 1,
+            0.0,
+            &mut c,
+            n,
+        ) {
+            assert_eq!(e, errors::GemmError::Ldb);
+        } else {
+            panic!("Invalid parameters");
+        }
+    }
+
+    #[test]
+    fn test_gemm_invalid_ldc() {
+        let m: u64 = 2;
+        let n: u64 = 1;
+        let k: u64 = 3;
+        let mut a: Vec<f32> = vec![0.0; (m * k) as usize];
+        let mut b: Vec<f32> = vec![0.0; (k * n) as usize];
+        let mut c: Vec<f32> = vec![0.0; (m * n) as usize];
+
+        for i in 0..(m * k) {
+            a[i as usize] = i as f32 + 1.0;
+        }
+
+        for i in 0..(k * n) {
+            b[i as usize] = i as f32 + 1.0;
+        }
+
+        if let Err(e) = level3::gemm(
+            StorageOrder::RowMajor,
+            Transpose::NoTrans,
+            Transpose::NoTrans,
+            m,
+            n,
+            k,
+            1.0,
+            &a,
+            k,
+            &b,
+            n,
+            0.0,
+            &mut c,
+            n - 1,
+        ) {
+            assert_eq!(e, errors::GemmError::Ldc);
+        } else {
+            panic!("Invalid parameters");
+        }
+    }
+
+    #[test]
+    fn test_gemm_invalid_mat_a() {
+        let m: u64 = 2;
+        let n: u64 = 1;
+        let k: u64 = 3;
+        let mut a: Vec<f32> = vec![0.0; (m * k) as usize];
+        let mut b: Vec<f32> = vec![0.0; (k * n) as usize];
+        let mut c: Vec<f32> = vec![0.0; (m * n) as usize];
+
+        for i in 0..(m * k) {
+            a[i as usize] = i as f32 + 1.0;
+        }
+
+        for i in 0..(k * n) {
+            b[i as usize] = i as f32 + 1.0;
+        }
+
+        if let Err(e) = level3::gemm(
+            StorageOrder::RowMajor,
+            Transpose::NoTrans,
+            Transpose::NoTrans,
+            m,
+            n,
+            k,
+            1.0,
+            &a[1..],
+            k,
+            &b,
+            n,
+            0.0,
+            &mut c,
+            n,
+        ) {
+            assert_eq!(e, errors::GemmError::MatA);
+        } else {
+            panic!("Invalid parameters");
+        }
+    }
+
+    #[test]
+    fn test_gemm_invalid_mat_b() {
+        let m: u64 = 2;
+        let n: u64 = 1;
+        let k: u64 = 3;
+        let mut a: Vec<f32> = vec![0.0; (m * k) as usize];
+        let mut b: Vec<f32> = vec![0.0; (k * n) as usize];
+        let mut c: Vec<f32> = vec![0.0; (m * n) as usize];
+
+        for i in 0..(m * k) {
+            a[i as usize] = i as f32 + 1.0;
+        }
+
+        for i in 0..(k * n) {
+            b[i as usize] = i as f32 + 1.0;
+        }
+
+        if let Err(e) = level3::gemm(
+            StorageOrder::RowMajor,
+            Transpose::NoTrans,
+            Transpose::NoTrans,
+            m,
+            n,
+            k,
+            1.0,
+            &a,
+            k,
+            &b[1..],
+            n,
+            0.0,
+            &mut c,
+            n,
+        ) {
+            assert_eq!(e, errors::GemmError::MatB);
+        } else {
+            panic!("Invalid parameters");
+        }
+    }
+
+    #[test]
+    fn test_gemm_invalid_mat_c() {
+        let m: u64 = 2;
+        let n: u64 = 1;
+        let k: u64 = 3;
+        let mut a: Vec<f32> = vec![0.0; (m * k) as usize];
+        let mut b: Vec<f32> = vec![0.0; (k * n) as usize];
+        let mut c: Vec<f32> = vec![0.0; (m * n) as usize];
+
+        for i in 0..(m * k) {
+            a[i as usize] = i as f32 + 1.0;
+        }
+
+        for i in 0..(k * n) {
+            b[i as usize] = i as f32 + 1.0;
+        }
+
+        if let Err(e) = level3::gemm(
+            StorageOrder::RowMajor,
+            Transpose::NoTrans,
+            Transpose::NoTrans,
+            m,
+            n,
+            k,
+            1.0,
+            &a,
+            k,
+            &b,
+            n,
+            0.0,
+            &mut c[1..],
+            n,
+        ) {
+            assert_eq!(e, errors::GemmError::MatC);
+        } else {
+            panic!("Invalid parameters");
+        }
+    }
+
+    #[test]
+    fn test_gemv() {
+        let m: u64 = 2;
+        let n: u64 = 3;
+        let mut a: Vec<f32> = vec![0.0; (m * n) as usize];
+        let mut x: Vec<f32> = vec![0.0; n as usize];
+        let mut y: Vec<f32> = vec![0.0; m as usize];
+
+        for i in 0..(m * n) {
+            a[i as usize] = i as f32 + 1.0;
+        }
+
+        for i in 0..n {
+            x[i as usize] = i as f32 + 1.0;
+        }
+
+        if let Err(_) = level2::gemv(
+            StorageOrder::RowMajor,
+            Transpose::NoTrans,
+            m,
+            n,
+            1.0,
+            &a,
+            n,
+            &x,
+            1,
+            0.0,
+            &mut y,
+            1,
+        ) {
+            panic!("Invalid parameters");
+        }
+
+        assert_eq!(y, vec![14.0, 32.0]);
+    }
+
+    #[test]
+    fn test_gemv_invalid_lda() {
+        let m: u64 = 2;
+        let n: u64 = 3;
+        let mut a: Vec<f32> = vec![0.0; (m * n) as usize];
+        let mut x: Vec<f32> = vec![0.0; n as usize];
+        let mut y: Vec<f32> = vec![0.0; m as usize];
+
+        for i in 0..(m * n) {
+            a[i as usize] = i as f32 + 1.0;
+        }
+
+        for i in 0..n {
+            x[i as usize] = i as f32 + 1.0;
+        }
+
+        if let Err(e) = level2::gemv(
+            StorageOrder::RowMajor,
+            Transpose::NoTrans,
+            m,
+            n,
+            1.0,
+            &a,
+            n - 1,
+            &x,
+            1,
+            0.0,
+            &mut y,
+            1,
+        ) {
+            assert_eq!(e, errors::GemvError::Lda);
+        } else {
+            panic!("Invalid parameters");
+        }
+    }
+
+    #[test]
+    fn test_gemv_invalid_vec_x() {
+        let m: u64 = 2;
+        let n: u64 = 3;
+        let mut a: Vec<f32> = vec![0.0; (m * n) as usize];
+        let mut x: Vec<f32> = vec![0.0; n as usize];
+        let mut y: Vec<f32> = vec![0.0; m as usize];
+
+        for i in 0..(m * n) {
+            a[i as usize] = i as f32 + 1.0;
+        }
+
+        for i in 0..n {
+            x[i as usize] = i as f32 + 1.0;
+        }
+
+        if let Err(e) = level2::gemv(
+            StorageOrder::RowMajor,
+            Transpose::NoTrans,
+            m,
+            n,
+            1.0,
+            &a,
+            n,
+            &x[1..],
+            1,
+            0.0,
+            &mut y,
+            1,
+        ) {
+            assert_eq!(e, errors::GemvError::VecX);
+        } else {
+            panic!("Invalid parameters");
+        }
+    }
+
+    #[test]
+    fn test_gemv_invalid_vec_y() {
+        let m: u64 = 2;
+        let n: u64 = 3;
+        let mut a: Vec<f32> = vec![0.0; (m * n) as usize];
+        let mut x: Vec<f32> = vec![0.0; n as usize];
+        let mut y: Vec<f32> = vec![0.0; m as usize];
+
+        for i in 0..(m * n) {
+            a[i as usize] = i as f32 + 1.0;
+        }
+
+        for i in 0..n {
+            x[i as usize] = i as f32 + 1.0;
+        }
+
+        if let Err(e) = level2::gemv(
+            StorageOrder::RowMajor,
+            Transpose::NoTrans,
+            m,
+            n,
+            1.0,
+            &a,
+            n,
+            &x,
+            1,
+            0.0,
+            &mut y[1..],
+            1,
+        ) {
+            assert_eq!(e, errors::GemvError::VecY);
+        } else {
+            panic!("Invalid parameters");
+        }
+    }
+
+    #[test]
+    fn test_gemv_invalid_inc_x() {
+        let m: u64 = 2;
+        let n: u64 = 3;
+        let mut a: Vec<f32> = vec![0.0; (m * n) as usize];
+        let mut x: Vec<f32> = vec![0.0; n as usize];
+        let mut y: Vec<f32> = vec![0.0; m as usize];
+
+        for i in 0..(m * n) {
+            a[i as usize] = i as f32 + 1.0;
+        }
+
+        for i in 0..n {
+            x[i as usize] = i as f32 + 1.0;
+        }
+
+        if let Err(e) = level2::gemv(
+            StorageOrder::RowMajor,
+            Transpose::NoTrans,
+            m,
+            n,
+            1.0,
+            &a,
+            n,
+            &x,
+            0,
+            0.0,
+            &mut y,
+            1,
+        ) {
+            assert_eq!(e, errors::GemvError::IncX);
+        } else {
+            panic!("Invalid parameters");
+        }
+    }
+
+    #[test]
+    fn test_gemv_invalid_inc_y() {
+        let m: u64 = 2;
+        let n: u64 = 3;
+        let mut a: Vec<f32> = vec![0.0; (m * n) as usize];
+        let mut x: Vec<f32> = vec![0.0; n as usize];
+        let mut y: Vec<f32> = vec![0.0; m as usize];
+
+        for i in 0..(m * n) {
+            a[i as usize] = i as f32 + 1.0;
+        }
+
+        for i in 0..n {
+            x[i as usize] = i as f32 + 1.0;
+        }
+
+        if let Err(e) = level2::gemv(
+            StorageOrder::RowMajor,
+            Transpose::NoTrans,
+            m,
+            n,
+            1.0,
+            &a,
+            n,
+            &x,
+            1,
+            0.0,
+            &mut y,
+            0,
+        ) {
+            assert_eq!(e, errors::GemvError::IncY);
+        } else {
+            panic!("Invalid parameters");
+        }
     }
 }
