@@ -1,7 +1,7 @@
 use std::env;
-use std::path::PathBuf;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
+use std::path::PathBuf;
 
 fn main() {
     let mut cmaker = cmake::Config::new("hasty_blas_c");
@@ -26,7 +26,10 @@ fn main() {
 
     // Iterate over each line in the file
     for line in reader.lines() {
-        let line = line.expect("Could not read line from file").trim().to_string();
+        let line = line
+            .expect("Could not read line from file")
+            .trim()
+            .to_string();
 
         match line.as_str() {
             "accelerate" => {
@@ -43,7 +46,10 @@ fn main() {
                 let filename = filename.strip_prefix("lib").unwrap_or(filename);
                 let filename = filename.split(".").next().unwrap_or(filename);
 
-                println!("cargo:rustc-link-search=native={}", path.parent().unwrap().display());
+                println!(
+                    "cargo:rustc-link-search=native={}",
+                    path.parent().unwrap().display()
+                );
                 println!("cargo:rustc-link-lib=static={}", filename);
             }
         }
@@ -52,6 +58,7 @@ fn main() {
     let bindings = bindgen::Builder::default()
         .header("./hasty_blas_c/include/hasty_blas_c.h")
         .header("./hasty_blas_c/include/level3/gemm.h")
+        .header("./hasty_blas_c/include/level2/gemv.h")
         .generate()
         .expect("Unable to generate bindings");
 

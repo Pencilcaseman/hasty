@@ -10,10 +10,14 @@
 
 #![warn(missing_docs)]
 #![warn(clippy::pedantic, clippy::nursery)]
+#![doc(
+    html_favicon_url = "https://raw.githubusercontent.com/Pencilcaseman/hasty/master/img/logo_dark_mode.png"
+)]
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/Pencilcaseman/hasty/master/img/logo_dark_mode.png"
+)]
 
-#![doc(html_favicon_url = "https://raw.githubusercontent.com/Pencilcaseman/hasty/master/img/logo_dark_mode.png")]
-#![doc(html_logo_url = "https://raw.githubusercontent.com/Pencilcaseman/hasty/master/img/logo_dark_mode.png")]
-
+pub mod errors;
 mod hasty_blas_c;
 
 /// Represents the storage order of a matrix.
@@ -55,6 +59,34 @@ fn transpose_ffi(transpose: Transpose) -> hasty_blas_c::CBLAS_TRANSPOSE {
         Transpose::Conj => hasty_blas_c::CBLAS_TRANSPOSE_CblasConjNoTrans,
         Transpose::Trans => hasty_blas_c::CBLAS_TRANSPOSE_CblasTrans,
         Transpose::ConjTrans => hasty_blas_c::CBLAS_TRANSPOSE_CblasConjTrans,
+    }
+}
+
+fn validate_ld<T>(
+    order: &StorageOrder,
+    trans: &Transpose,
+    rows: &u64,
+    cols: &u64,
+    ld: &u64,
+    err: T,
+) -> Result<(), T> {
+    // If using column major ordering, swap rows and cols
+    let (rows, cols) = match order {
+        StorageOrder::RowMajor => (rows, cols),
+        StorageOrder::ColMajor => (cols, rows),
+    };
+
+    // If transposed, swap rows and cols again
+    let cols = match trans {
+        Transpose::NoTrans | Transpose::Conj => cols,
+        Transpose::Trans | Transpose::ConjTrans => rows,
+    };
+
+    // Now, leading dimension must be at least max(1, cols)
+    if ld >= std::cmp::max(&1, cols) {
+        Ok(())
+    } else {
+        Err(err)
     }
 }
 
@@ -100,40 +132,47 @@ pub fn get_blas_library() -> BlasLibrary {
 /// Level 3 BLAS routines, which perform matrix-matrix operations.
 pub mod level3 {
     /// Trait for general matrix multiplication.
-    pub trait Gemm where Self: Sized {
+    pub trait Gemm
+    where
+        Self: Sized,
+    {
         /// General matrix multiplication. See [`gemm`](fn.gemm.html) for more
         /// information.
-        fn gemm(order: crate::StorageOrder,
-                trans_a: crate::Transpose,
-                trans_b: crate::Transpose,
-                m: u64,
-                n: u64,
-                k: u64,
-                alpha: Self,
-                a: &[Self],
-                lda: u64,
-                b: &[Self],
-                ldb: u64,
-                beta: Self,
-                c: &mut [Self],
-                ldc: u64);
+        fn gemm(
+            order: crate::StorageOrder,
+            trans_a: crate::Transpose,
+            trans_b: crate::Transpose,
+            m: u64,
+            n: u64,
+            k: u64,
+            alpha: Self,
+            a: &[Self],
+            lda: u64,
+            b: &[Self],
+            ldb: u64,
+            beta: Self,
+            c: &mut [Self],
+            ldc: u64,
+        );
     }
 
     impl Gemm for f32 {
-        fn gemm(order: crate::StorageOrder,
-                trans_a: crate::Transpose,
-                trans_b: crate::Transpose,
-                m: u64,
-                n: u64,
-                k: u64,
-                alpha: Self,
-                a: &[Self],
-                lda: u64,
-                b: &[Self],
-                ldb: u64,
-                beta: Self,
-                c: &mut [Self],
-                ldc: u64) {
+        fn gemm(
+            order: crate::StorageOrder,
+            trans_a: crate::Transpose,
+            trans_b: crate::Transpose,
+            m: u64,
+            n: u64,
+            k: u64,
+            alpha: Self,
+            a: &[Self],
+            lda: u64,
+            b: &[Self],
+            ldb: u64,
+            beta: Self,
+            c: &mut [Self],
+            ldc: u64,
+        ) {
             unsafe {
                 crate::hasty_blas_c::hasty_blas_sgemm(
                     crate::order_ffi(order),
@@ -156,20 +195,22 @@ pub mod level3 {
     }
 
     impl Gemm for f64 {
-        fn gemm(order: crate::StorageOrder,
-                trans_a: crate::Transpose,
-                trans_b: crate::Transpose,
-                m: u64,
-                n: u64,
-                k: u64,
-                alpha: Self,
-                a: &[Self],
-                lda: u64,
-                b: &[Self],
-                ldb: u64,
-                beta: Self,
-                c: &mut [Self],
-                ldc: u64) {
+        fn gemm(
+            order: crate::StorageOrder,
+            trans_a: crate::Transpose,
+            trans_b: crate::Transpose,
+            m: u64,
+            n: u64,
+            k: u64,
+            alpha: Self,
+            a: &[Self],
+            lda: u64,
+            b: &[Self],
+            ldb: u64,
+            beta: Self,
+            c: &mut [Self],
+            ldc: u64,
+        ) {
             unsafe {
                 crate::hasty_blas_c::hasty_blas_dgemm(
                     crate::order_ffi(order),
@@ -208,25 +249,28 @@ pub mod level3 {
     /// # Parameters
     ///
     /// * `order`: The storage order of the matrices
-    /// * `trans_a`: Whether to transpose $a$
-    /// * `trans_b`: Whether to transpose $b$
-    /// * `m`: The number of rows in $a$ and $c$
-    /// * `n`: The number of columns in $b$ and $c$
-    /// * `k`: The number of columns in $a$ and rows in $b$
-    /// * `alpha`: The scalar $\alpha$
-    /// * `a`: The matrix $a$
-    /// * `lda`: The leading dimension of $a$
-    /// * `b`: The matrix $b$
-    /// * `ldb`: The leading dimension of $b$
-    /// * `beta`: The scalar $\beta$
-    /// * `c`: The matrix $c$
-    /// * `ldc`: The leading dimension of $c$
+    /// * `trans_a`: Whether to transpose `a`
+    /// * `trans_b`: Whether to transpose `b`
+    /// * `m`: The number of rows in `a` and `c`
+    /// * `n`: The number of columns in `b` and `c`
+    /// * `k`: The number of columns in `a` and rows in `b`
+    /// * `alpha`: The scalar `alpha`
+    /// * `a`: The matrix `a`
+    /// * `lda`: The leading dimension of `a`
+    /// * `b`: The matrix `b`
+    /// * `ldb`: The leading dimension of `b`
+    /// * `beta`: The scalar `beta`
+    /// * `c`: The matrix `c`
+    /// * `ldc`: The leading dimension of `c`
     ///
     /// # Panics
     ///
     /// * `a.len() != m * k`
     /// * `b.len() != k * n`
     /// * `c.len() != m * n`
+    /// * `lda < cols of op(a)`
+    /// * `ldb < cols of op(b)`
+    /// * `ldc < n`
     ///
     /// # Example
     ///
@@ -283,28 +327,175 @@ pub mod level3 {
         beta: T,
         c: &mut [T],
         ldc: u64,
-    ) {
+    ) -> Result<(), crate::errors::GemmError> {
         // Check dimensions and strides are valid
         assert_eq!(a.len() as u64, m * k);
         assert_eq!(b.len() as u64, k * n);
         assert_eq!(c.len() as u64, m * n);
 
+        crate::validate_ld(
+            &order,
+            &trans_a,
+            &m,
+            &k,
+            &lda,
+            crate::errors::GemmError::Lda,
+        )?;
+
+        crate::validate_ld(
+            &order,
+            &trans_b,
+            &k,
+            &n,
+            &ldb,
+            crate::errors::GemmError::Ldb,
+        )?;
+
+        crate::validate_ld(
+            &order,
+            &crate::Transpose::NoTrans,
+            &m,
+            &n,
+            &ldc,
+            crate::errors::GemmError::Ldc,
+        )?;
+
         T::gemm(
-            order,
-            trans_a,
-            trans_b,
-            m,
-            n,
-            k,
-            alpha,
-            a,
-            lda,
-            b,
-            ldb,
-            beta,
-            c,
-            ldc,
+            order, trans_a, trans_b, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc,
         );
+
+        Ok(())
+    }
+}
+
+/// Level 2 BLAS routines, which perform matrix-vector operations.
+pub mod level2 {
+    /// Trait for general matrix-vector multiplication
+    pub trait Gemv
+    where
+        Self: Sized,
+    {
+        /// General matrix-vector multiplication. See [`gemv`](fn.gemv.html) for
+        /// more information.
+        fn gemv(
+            order: crate::StorageOrder,
+            trans: crate::Transpose,
+            m: u64,
+            n: u64,
+            alpha: Self,
+            a: &[Self],
+            lda: u64,
+            x: &[Self],
+            inc_x: u64,
+            beta: Self,
+            y: &mut [Self],
+            inc_y: u64,
+        );
+    }
+
+    impl Gemv for f32 {
+        fn gemv(
+            order: crate::StorageOrder,
+            trans: crate::Transpose,
+            m: u64,
+            n: u64,
+            alpha: Self,
+            a: &[Self],
+            lda: u64,
+            x: &[Self],
+            inc_x: u64,
+            beta: Self,
+            y: &mut [Self],
+            inc_y: u64,
+        ) {
+            unsafe {
+                crate::hasty_blas_c::hasty_blas_sgemv(
+                    crate::order_ffi(order),
+                    crate::transpose_ffi(trans),
+                    m,
+                    n,
+                    alpha,
+                    a.as_ptr(),
+                    lda,
+                    x.as_ptr(),
+                    inc_x,
+                    beta,
+                    y.as_mut_ptr(),
+                    inc_y,
+                );
+            }
+        }
+    }
+
+    /// General matrix-vector multiplication
+    ///
+    /// Compute `c := alpha * op(a) * x + beta * c`, where `a` is a
+    /// `m x n` matrix, `x` is a vector with `n` elements, `c` is a
+    /// vector with `m` elements, and `alpha` and `beta` are scalars.
+    /// `op` is one of:
+    /// * `op(x) = x`
+    /// * `op(x) = x^T`
+    /// * `op(x) = x^H`
+    ///
+    /// # Type Parameters
+    ///
+    /// * `T`: The type of the matrix and vector elements
+    ///
+    /// # Parameters
+    ///
+    /// * `order`: The storage order of the matrix
+    /// * `trans`: Whether to transpose `a`
+    ///
+    /// # Panics
+    ///
+    /// * `a.len() != m * n`
+    /// * TODO: Better error checking... Not sure exactly what conditions are required
+    ///
+    /// # Example
+    ///
+    /// ```none
+    /// [[1 2 3]  x [1 2 3] = [14 32]
+    ///  [4 5 6]]
+    /// ```
+    ///
+    /// ```rust
+    /// let a: Vec<f32> = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0];
+    /// let b: Vec<f32> = vec![1.0, 2.0, 3.0];
+    /// let mut c: Vec<f32> = vec![0.0, 0.0];
+    ///
+    /// hasty::level2::gemv(
+    ///     hasty::StorageOrder::RowMajor,
+    ///     hasty::Transpose::NoTrans,
+    ///     2,
+    ///     3,
+    ///     1.0,
+    ///     &a,
+    ///     3,
+    ///     &b,
+    ///     1,
+    ///     0.0,
+    ///     &mut c,
+    ///     1,
+    /// );
+    ///
+    /// println!("GEMV Result: {:?}", c);
+    /// ```
+    ///
+    pub fn gemv<T: Gemv>(
+        order: crate::StorageOrder,
+        trans: crate::Transpose,
+        m: u64,
+        n: u64,
+        alpha: T,
+        a: &[T],
+        lda: u64,
+        x: &[T],
+        inc_x: u64,
+        beta: T,
+        y: &mut [T],
+        inc_y: u64,
+    ) {
+        T::gemv(order, trans, m, n, alpha, a, lda, x, inc_x, beta, y, inc_y);
     }
 }
 
