@@ -22,7 +22,7 @@ fn bench_gemm(m: u64, n: u64, k: u64, a: &Vec<f32>, b: &Vec<f32>, c: &mut Vec<f3
 fn criterion_benchmark(crit: &mut Criterion) {
     let mut mnk = crit.benchmark_group(format!("gemm ({})", hasty::get_blas_library()));
 
-    for size in [5, 10, 20, 50, 100, 200, 500, 1000].iter() {
+    for size in [5, 10, 20, 50, 100, 200, 500, 1000, 1500, 2000].iter() {
         let m: u64 = *size;
         let n: u64 = *size;
         let k: u64 = *size;
@@ -39,14 +39,22 @@ fn criterion_benchmark(crit: &mut Criterion) {
             b[i as usize] = (i + 1) as f32;
         }
 
-        mnk.bench_with_input(criterion::BenchmarkId::new("m=n=k", size),
-                             size,
-                             |bench, &size| bench.iter(|| bench_gemm(black_box(size),
-                                                                     black_box(size),
-                                                                     black_box(size),
-                                                                     &a,
-                                                                     &b,
-                                                                     &mut c)));
+        mnk.bench_with_input(
+            criterion::BenchmarkId::new("m=n=k", size),
+            size,
+            |bench, &size| {
+                bench.iter(|| {
+                    bench_gemm(
+                        black_box(size),
+                        black_box(size),
+                        black_box(size),
+                        &a,
+                        &b,
+                        &mut c,
+                    )
+                })
+            },
+        );
     }
 }
 

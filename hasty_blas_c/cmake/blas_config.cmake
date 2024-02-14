@@ -99,7 +99,19 @@ macro(configure_blas)
         set_blas_definition_from_file(${filename})
         set(BLAS_FOUND true)
     else()
-        if (HASTY_BLAS_C_GET_BLAS)
+        if (HASTY_BLAS_C_BUILD_OPENBLAS)
+
+            FetchContent_Declare(
+                openblas
+                GIT_REPOSITORY https://github.com/OpenMathLib/OpenBLAS
+                GIT_TAG origin/develop
+            )
+
+            FetchContent_MakeAvailable(openblas)
+
+            # Link
+            target_link_libraries(hasty_blas_c PUBLIC openblas)
+        elseif (HASTY_BLAS_C_GET_BLAS)
             download_openblas()
         else ()
             find_package(BLAS REQUIRED)

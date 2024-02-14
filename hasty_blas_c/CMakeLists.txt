@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
-project(hasty_blas_c)
+project(hasty_blas_c LANGUAGES C CXX)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+
+include(FetchContent)
 
 file(GLOB_RECURSE HASTY_BLAS_HEADER
     "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h"

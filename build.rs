@@ -3,13 +3,44 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::PathBuf;
 
+#[allow(unreachable_code)]
+fn cmake_blas_args() -> Option<(String, String)> {
+    #[cfg(feature = "build_openblas")]
+    {
+        use std::io::Write;
+
+        println!("cargo:warning=Compiling the C library. This might take a few minutes...");
+        std::io::stdout().flush().unwrap();
+
+        return Some((
+            String::from("HASTY_BLAS_C_BUILD_OPENBLAS"),
+            String::from("ON"),
+        ));
+    }
+
+    #[cfg(feature = "prebuilt_openblas")]
+    {
+        use std::io::Write;
+
+        println!("cargo:warning=Using prebuilt OpenBLAS library");
+        std::io::stdout().flush().unwrap();
+
+        return Some((String::from("HASTY_BLAS_C_GET_BLAS"), String::from("ON")));
+    }
+
+    return None;
+}
+
 fn main() {
     let mut cmaker = cmake::Config::new("hasty_blas_c");
 
-    // Read HASTY_BLAS_PATH environment variable if it exists
     if let Ok(path) = env::var("HASTY_BLAS_PATH") {
-        // panic!("Defined");
         cmaker.define("HASTY_BLAS_PATH", path);
+    }
+
+    // Define CMake arguments based on features
+    if let Some((key, value)) = cmake_blas_args() {
+        cmaker.define(key, value);
     }
 
     let dst = cmaker.build();
@@ -36,8 +67,6 @@ fn main() {
                 println!("cargo:rustc-link-lib=framework=Accelerate");
             }
             _ => {
-                // println!("cargo:rustc-link-lib={}", line);
-
                 // Get path and filename
                 let path = PathBuf::from(line);
                 let filename = path.file_name().unwrap().to_str().unwrap();

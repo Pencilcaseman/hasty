@@ -1,6 +1,6 @@
 [package]
 name = "hasty"
-version = "0.1.4"
+version = "0.1.5"
 authors = ["Toby Davis"]
 description = "A Rust interface to system BLAS libraries for fast linear algebra operations"
 edition = "2021"
@@ -9,13 +9,21 @@ repository = "https://github.com/Pencilcaseman/hasty"
 license = "MIT"
 keywords = ["blas", "linear-algebra", "matrix", "vector"]
 
+[features]
+prefer_openblas = []
+prefer_accelerate = []
+prefer_mkl = []
+
+build_openblas = []
+prebuilt_openblas = []
+
 [dev-dependencies]
-criterion = { version = "0.4", features = ["html_reports"] }
-num-traits = "0.2.17"
+criterion = { version = "0.5", features = ["html_reports"] }
+num-traits = "0.2"
 
 [build-dependencies]
-bindgen = "0.69.1"
-cmake = "0.1.50"
+bindgen = "0.69"
+cmake = "0.1"
 
 [[bench]]
 name = "bench_gemm"
