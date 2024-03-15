@@ -23,17 +23,17 @@ set(IS_LINUX OFF)
 set(IS_MACOS OFF)
 set(IS_WINDOWS OFF)
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(IS_LINUX ON)
-endif ()
+endif()
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(IS_MACOS ON)
-endif ()
+endif()
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set(IS_WINDOWS ON)
-endif ()
+endif()
 
 include(blas_config)
 configure_blas()

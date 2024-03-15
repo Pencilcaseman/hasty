@@ -28,7 +28,47 @@ fn cmake_blas_args() -> Option<(String, String)> {
         return Some((String::from("HASTY_BLAS_C_GET_BLAS"), String::from("ON")));
     }
 
-    return None;
+    #[cfg(feature = "generic")]
+    {
+        return Some((String::from("HASTY_BLAS_C_GENERIC"), String::from("ON")));
+    }
+
+    #[cfg(feature = "acml")]
+    {
+        return Some((String::from("HASTY_BLAS_C_ACML"), String::from("ON")));
+    }
+
+    #[cfg(feature = "accelerate")]
+    {
+        return Some((String::from("HASTY_BLAS_C_ACCELERATE"), String::from("ON")));
+    }
+
+    #[cfg(feature = "arm")]
+    {
+        return Some((String::from("HASTY_BLAS_C_ARM"), String::from("ON")));
+    }
+
+    #[cfg(feature = "atlas")]
+    {
+        return Some((String::from("HASTY_BLAS_C_atlas"), String::from("ON")));
+    }
+
+    #[cfg(feature = "blis")]
+    {
+        return Some((String::from("HASTY_BLAS_C_BLIS"), String::from("ON")));
+    }
+
+    #[cfg(feature = "openblas")]
+    {
+        return Some((String::from("HASTY_BLAS_C_OPENBLAS"), String::from("ON")));
+    }
+
+    #[cfg(feature = "mkl")]
+    {
+        return Some((String::from("HASTY_BLAS_C_MKL"), String::from("ON")));
+    }
+
+    None
 }
 
 fn main() {

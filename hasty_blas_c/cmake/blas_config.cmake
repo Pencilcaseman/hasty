@@ -99,7 +99,26 @@ macro(configure_blas)
         set_blas_definition_from_file(${filename})
         set(BLAS_FOUND true)
     else()
-        if (HASTY_BLAS_C_BUILD_OPENBLAS)
+        if(HASTY_BLAS_C_GENERIC)
+            set(BLA_VENDOR "Generic")
+        elseif(HASTY_BLAS_C_ACML)
+            set(BLA_VENDOR "ACML")
+        elseif(HASTY_BLAS_C_ACCELERATE)
+            set(BLA_VENDOR "Apple")
+        elseif(HASTY_BLAS_C_ARM)
+            set(BLA_VENDOR "ARM")
+        elseif(HASTY_BLAS_C_ATLAS)
+            set(BLA_VENDOR "ATLAS")
+        elseif(HASTY_BLAS_C_BLIS)
+            set(BLA_VENDOR "BLIS")
+        elseif(HASTY_BLAS_C_OPENBLAS)
+            set(BLA_VENDOR "OpenBLAS")
+        elseif(HASTY_BLAS_C_MKL)
+            set(BLA_VENDOR "Intel10_64lp")
+        endif()
+
+
+        if(HASTY_BLAS_C_BUILD_OPENBLAS)
 
             FetchContent_Declare(
                 openblas
@@ -111,7 +130,7 @@ macro(configure_blas)
 
             # Link
             target_link_libraries(hasty_blas_c PUBLIC openblas)
-        elseif (HASTY_BLAS_C_GET_BLAS)
+        elseif(HASTY_BLAS_C_GET_BLAS)
             download_openblas()
         else ()
             find_package(BLAS REQUIRED)
