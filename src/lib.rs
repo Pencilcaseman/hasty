@@ -7,14 +7,38 @@
 //! To specify a particular BLAS library, set the `HASTY_BLAS_PATH`
 //! environment variable to the absolute path to the library. If this
 //! variable is not set, CMake will search for a library on the system.
+//!
+//! ## BLAS Vendors
+//!
+//! Hasty supports multiple BLAS vendors, and will search your system
+//! for a BLAS library automatically. If you want to specify which
+//! library to use, you can set a feature flag in your `Cargo.toml`.
+//!
+//! - `generic`: Generic reference implementation
+//! - `acml`: AMD Core Math Library
+//! - `accelerate`: Apple Accelerate
+//! - `arm`: ARM Performance Libraries
+//! - `atlas`: ATLAS (Automatically Tuned Linear Algebra Software)
+//! - `blis`: BLIS/Flame Framework
+//! - `openblas`: OpenBLAS
+//! - `mkl`: Intel MKL
+//!
+//! For example:
+//!
+//! ```toml
+//! # Cargo.toml
+//!
+//! [dependencies]
+//! hasty = { "x.y", features = ["openblas"] } # Use OpenBLAS backend
+//! ```
 
 #![warn(missing_docs)]
 #![warn(clippy::pedantic, clippy::nursery)]
 #![doc(
-html_favicon_url = "https://raw.githubusercontent.com/Pencilcaseman/hasty/master/img/logo_dark_mode.png"
+    html_favicon_url = "https://raw.githubusercontent.com/Pencilcaseman/hasty/master/img/logo_dark_mode.png"
 )]
 #![doc(
-html_logo_url = "https://raw.githubusercontent.com/Pencilcaseman/hasty/master/img/logo_dark_mode.png"
+    html_logo_url = "https://raw.githubusercontent.com/Pencilcaseman/hasty/master/img/logo_dark_mode.png"
 )]
 
 pub mod errors;
@@ -133,8 +157,8 @@ pub fn get_blas_library() -> BlasLibrary {
 pub mod level3 {
     /// Trait for general matrix multiplication.
     pub trait Gemm
-        where
-            Self: Sized,
+    where
+        Self: Sized,
     {
         /// General matrix multiplication. See [`gemm`](fn.gemm.html) for more
         /// information.
@@ -345,9 +369,15 @@ pub mod level3 {
         ldc: u64,
     ) -> Result<(), crate::errors::GemmError> {
         // Check dimensions and strides are valid
-        if a.len() as u64 != m * k { return Err(crate::errors::GemmError::MatA); }
-        if b.len() as u64 != k * n { return Err(crate::errors::GemmError::MatB); }
-        if c.len() as u64 != m * n { return Err(crate::errors::GemmError::MatC); }
+        if a.len() as u64 != m * k {
+            return Err(crate::errors::GemmError::MatA);
+        }
+        if b.len() as u64 != k * n {
+            return Err(crate::errors::GemmError::MatB);
+        }
+        if c.len() as u64 != m * n {
+            return Err(crate::errors::GemmError::MatC);
+        }
 
         crate::validate_ld(
             &order,
@@ -388,8 +418,8 @@ pub mod level3 {
 pub mod level2 {
     /// Trait for general matrix-vector multiplication
     pub trait Gemv
-        where
-            Self: Sized,
+    where
+        Self: Sized,
     {
         /// General matrix-vector multiplication. See [`gemv`](fn.gemv.html) for
         /// more information.
@@ -537,24 +567,31 @@ pub mod level2 {
         y: &mut [T],
         inc_y: i64,
     ) -> Result<(), crate::errors::GemvError> {
-        if a.len() != (m * n) as usize { return Err(crate::errors::GemvError::MatA); }
-        if x.len() != n as usize { return Err(crate::errors::GemvError::VecX); }
-        if y.len() != m as usize { return Err(crate::errors::GemvError::VecY); }
+        if a.len() != (m * n) as usize {
+            return Err(crate::errors::GemvError::MatA);
+        }
+        if x.len() != n as usize {
+            return Err(crate::errors::GemvError::VecX);
+        }
+        if y.len() != m as usize {
+            return Err(crate::errors::GemvError::VecY);
+        }
 
-        crate::validate_ld(
-            &order,
-            &trans,
-            &m,
-            &n,
-            &lda,
-            crate::errors::GemvError::Lda,
-        )?;
+        crate::validate_ld(&order, &trans, &m, &n, &lda, crate::errors::GemvError::Lda)?;
 
-        if inc_x == 0 { return Err(crate::errors::GemvError::IncX); }
-        if inc_y == 0 { return Err(crate::errors::GemvError::IncY); }
+        if inc_x == 0 {
+            return Err(crate::errors::GemvError::IncX);
+        }
+        if inc_y == 0 {
+            return Err(crate::errors::GemvError::IncY);
+        }
 
-        if x.len() < (1 + (n - 1) * inc_x.unsigned_abs()) as usize { return Err(crate::errors::GemvError::IncX); }
-        if y.len() < (1 + (m - 1) * inc_y.unsigned_abs()) as usize { return Err(crate::errors::GemvError::IncY); }
+        if x.len() < (1 + (n - 1) * inc_x.unsigned_abs()) as usize {
+            return Err(crate::errors::GemvError::IncX);
+        }
+        if y.len() < (1 + (m - 1) * inc_y.unsigned_abs()) as usize {
+            return Err(crate::errors::GemvError::IncY);
+        }
 
         T::gemv(order, trans, m, n, alpha, a, lda, x, inc_x, beta, y, inc_y);
 
