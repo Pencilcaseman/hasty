@@ -1,10 +1,10 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
 fn bench_gemm(m: u64, n: u64, k: u64, a: &Vec<f32>, b: &Vec<f32>, c: &mut Vec<f32>) {
-    hasty::level3::gemm(
-        hasty::StorageOrder::RowMajor,
-        hasty::Transpose::NoTrans,
-        hasty::Transpose::NoTrans,
+    hasty::blas::level3::gemm(
+        hasty::blas::StorageOrder::RowMajor,
+        hasty::blas::Transpose::NoTrans,
+        hasty::blas::Transpose::NoTrans,
         m,
         n,
         k,
@@ -20,7 +20,7 @@ fn bench_gemm(m: u64, n: u64, k: u64, a: &Vec<f32>, b: &Vec<f32>, c: &mut Vec<f3
 }
 
 fn criterion_benchmark(crit: &mut Criterion) {
-    let mut mnk = crit.benchmark_group(format!("gemm ({})", hasty::get_blas_library()));
+    let mut mnk = crit.benchmark_group(format!("gemm ({})", hasty::blas::get_blas_library()));
 
     for size in [5, 10, 20, 50, 100, 200, 500, 1000, 1500, 2000].iter() {
         let m: u64 = *size;
