@@ -10,7 +10,7 @@ license = "MIT"
 keywords = ["blas", "linear-algebra", "matrix", "vector"]
 
 [features]
-default = ["blas", "opencl", "cuda"]
+default = []
 
 blas = []
 opencl = []
