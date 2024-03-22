@@ -1,9 +1,10 @@
-#ifndef HASTY_BLAS_C_HPP
-#define HASTY_BLAS_C_HPP
+#ifndef HASTY_BLAS_H
+#define HASTY_BLAS_H
+#ifdef HASTY_IMPL_HAS_BLAS
 
 #include <stdint.h>
 
-#ifndef HASTY_BLAS_IMPL_ACCELERATE
+#ifndef HASTY_IMPL_BLAS_ACCELERATE
 enum CBLAS_ORDER { CblasRowMajor = 101, CblasColMajor = 102 };
 
 enum CBLAS_TRANSPOSE {
@@ -27,12 +28,14 @@ enum HastyBlasImpl {
 
 enum HastyBlasImpl hasty_blas_get_impl();
 
-#if defined(HASTY_BLAS_IMPL_ACCELERATE)
+#if defined(HASTY_IMPL_BLAS_ACCELERATE)
 #   include <config/accelerate.h>
-#elif defined(HASTY_BLAS_IMPL_OPENBLAS)
+#elif defined(HASTY_IMPL_BLAS_OPENBLAS)
 #   include <config/openblas.h>
 #endif
 
+#include "level2/gemv.h"
 #include "level3/gemm.h"
 
-#endif // HASTY_BLAS_C_HPP
+#endif // HASTY_IMPL_HAS_BLAS
+#endif // HASTY_BLAS_H

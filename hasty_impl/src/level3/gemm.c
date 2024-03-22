@@ -1,4 +1,6 @@
-#include <hasty_blas_c.h>
+#if defined(HASTY_IMPL_HAS_BLAS)
+
+#include <hasty_blas.h>
 
 void hasty_blas_sgemm(
         enum CBLAS_ORDER order,
@@ -67,3 +69,10 @@ void hasty_blas_dgemm(
         ldc
     );
 }
+
+#else
+
+// Define a function so it doesn't complain
+void gemm_placeholder() {}
+
+#endif // HASTY_IMPL_HAS_BLAS

@@ -15,4 +15,5 @@ Cargo.lock
 
 **/.DS_Store
 
-hasty_blas_c/build
+hasty_impl/build
+hasty_impl/.idea

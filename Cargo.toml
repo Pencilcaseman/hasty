@@ -10,21 +10,22 @@ license = "MIT"
 keywords = ["blas", "linear-algebra", "matrix", "vector"]
 
 [features]
-# prefer_openblas = []
-# prefer_accelerate = []
-# prefer_mkl = []
+default = ["blas", "opencl", "cuda"]
+
+blas = []
+opencl = []
+cuda = []
 
 build_openblas = []
 prebuilt_openblas = []
 
-generic = []    # Generic reference implementation
-acml = []       # AMD Core Math Library
-accelerate = [] # Apple Accelerate
-arm = []        # ARM Performance Libraries
-atlas = []      # ATLAS (Automatically Tuned Linear Algebra Software)
-blis = []       # BLIS/Flame Framework
-openblas = []   # OpenBLAS
-mkl = []        # Intel MKL
+blas_acml = ["blas"]       # AMD Core Math Library
+blas_accelerate = ["blas"] # Apple Accelerate
+blas_arm = ["blas"]        # ARM Performance Libraries
+blas_atlas = ["blas"]      # ATLAS (Automatically Tuned Linear Algebra Software)
+blas_blis = ["blas"]       # BLIS/Flame Framework
+blas_openblas = ["blas"]   # OpenBLAS
+blas_mkl = ["blas"]        # Intel MKL
 
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }

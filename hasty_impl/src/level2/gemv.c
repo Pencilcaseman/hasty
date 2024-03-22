@@ -1,4 +1,6 @@
-#include <hasty_blas_c.h>
+#if defined(HASTY_IMPL_HAS_BLAS)
+
+#include <hasty_blas.h>
 
 void hasty_blas_sgemv(
   enum CBLAS_ORDER order,
@@ -59,3 +61,10 @@ void hasty_blas_dgemv(
     inc_y
   );
 }
+
+#else
+
+// Stop the compiler from complaining
+void gemv_placeholder() {}
+
+#endif // HASTY_IMPL_HAS_BLAS

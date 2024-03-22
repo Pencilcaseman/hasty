@@ -1,7 +1,8 @@
 #ifndef HASTY_BLAS_C_GEMM_H
 #define HASTY_BLAS_C_GEMM_H
+#if defined(HASTY_IMPL_HAS_BLAS)
 
-#include "../hasty_blas_c.h"
+#include "../hasty_blas.h"
 
 void hasty_blas_sgemm(
             enum CBLAS_ORDER order,
@@ -37,4 +38,5 @@ void hasty_blas_dgemm(
             uint64_t ldc
 );
 
+#endif // HASTY_IMPL_HAS_BLAS
 #endif // HASTY_BLAS_C_GEMM_H

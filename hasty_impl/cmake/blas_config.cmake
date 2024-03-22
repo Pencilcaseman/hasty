@@ -1,6 +1,6 @@
 macro(set_blas_definition name)
-    target_compile_definitions(hasty_blas_c PUBLIC HASTY_BLAS_HAS_BLAS)
-    target_compile_definitions(hasty_blas_c PUBLIC HASTY_BLAS_IMPL_${name})
+    target_compile_definitions(hasty_impl PUBLIC HASTY_IMPL_HAS_BLAS)
+    target_compile_definitions(hasty_impl PUBLIC HASTY_IMPL_BLAS_${name})
 endmacro()
 
 # Identify which BLAS library is being used based on the filename or path
@@ -22,21 +22,17 @@ macro(identify_blas filename)
         set_blas_definition("GENERIC")
     endif ()
 
-    message(STATUS "[ HASTY_BLAS_C ] Identified BLAS Library: ${filename}")
-    message(STATUS "[ HASTY_BLAS_C ] Identified BLAS Library: ${BLAS_LIB}")
-endmacro()
-
-macro(write_blas_config data)
-    file(WRITE ${CMAKE_BINARY_DIR}/blas_config.txt "${data}")
+    message(STATUS "[ HASTY_IMPL ] Identified BLAS Library: ${filename}")
+    message(STATUS "[ HASTY_IMPL ] Identified BLAS Library: ${BLAS_LIB}")
 endmacro()
 
 macro(set_blas_definition_from_file filename)
     identify_blas(${filename})
-    target_compile_definitions(hasty_blas_c PUBLIC HASTY_BLAS_BLAS_${BLAS_LIB})
+    target_compile_definitions(hasty_impl PUBLIC HASTY_BLAS_BLAS_${BLAS_LIB})
 endmacro()
 
 macro(download_openblas)
-    message(STATUS "[ HASTY_BLAS_C ] Downloading OpenBLAS Build...")
+    message(STATUS "[ HASTY_IMPL ] Downloading OpenBLAS Build...")
 
     FetchContent_Declare(
             BuildOpenBLAS
@@ -61,26 +57,26 @@ macro(download_openblas)
     endif ()
 
     set_blas_definition("OPENBLAS")
-    set(HASTY_BLAS_C_BLAS ${BLAS_LIBRARIES})
+    set(HASTY_IMPL_BLAS ${BLAS_LIBRARIES})
 endmacro()
 
 macro(link_openblas)
     get_filename_component(filepath ${HASTY_BLAS_BLAS} DIRECTORY)
     get_filename_component(filename ${HASTY_BLAS_BLAS} NAME)
 
-    write_blas_config(${HASTY_BLAS_C_BLAS})
-    target_link_libraries(hasty_blas_c PUBLIC ${HASTY_BLAS_C_BLAS})
+    write_library_config(${HASTY_IMPL_BLAS})
+    target_link_libraries(hasty_impl PUBLIC ${HASTY_IMPL_BLAS})
     set_blas_definition("OPENBLAS")
 endmacro()
 
 macro(link_accelerate)
-    write_blas_config("accelerate")
-    target_link_libraries(hasty_blas_c PUBLIC "-framework Accelerate")
+    write_library_config("accelerate")
+    target_link_libraries(hasty_impl PUBLIC "-framework Accelerate")
 
     # If not using apple-clang, we need to relax some conditions
     if (NOT CMAKE_C_COMPILER_ID MATCHES "AppleClang")
-        message(WARNING "[ HASTY_BLAS_C ] Accelerate is designed for AppleClang. Relaxing some conditions")
-        target_compile_options(hasty_blas_c PUBLIC "-flax-vector-conversions")
+        message(WARNING "[ HASTY_IMPL ] Accelerate is designed for AppleClang. Relaxing some conditions")
+        target_compile_options(hasty_impl PUBLIC "-flax-vector-conversions")
     endif ()
 
     message(STATUS "Linking Apple Accelerate")
@@ -95,30 +91,30 @@ macro(configure_blas)
         set(BLAS_LIBRARIES "${HASTY_BLAS_PATH}")
         # Extract filename from path
         get_filename_component(filename ${HASTY_BLAS_PATH} NAME)
-        message(STATUS "[ HASTY_BLAS_C ] Using BLAS at ${filename}")
+        message(STATUS "[ HASTY_IMPL ] Using BLAS at ${filename}")
         set_blas_definition_from_file(${filename})
         set(BLAS_FOUND true)
     else()
-        if(HASTY_BLAS_C_GENERIC)
+        if(HASTY_IMPL_GENERIC)
             set(BLA_VENDOR "Generic")
-        elseif(HASTY_BLAS_C_ACML)
+        elseif(HASTY_IMPL_ACML)
             set(BLA_VENDOR "ACML")
-        elseif(HASTY_BLAS_C_ACCELERATE)
+        elseif(HASTY_IMPL_ACCELERATE)
             set(BLA_VENDOR "Apple")
-        elseif(HASTY_BLAS_C_ARM)
+        elseif(HASTY_IMPL_ARM)
             set(BLA_VENDOR "ARM")
-        elseif(HASTY_BLAS_C_ATLAS)
+        elseif(HASTY_IMPL_ATLAS)
             set(BLA_VENDOR "ATLAS")
-        elseif(HASTY_BLAS_C_BLIS)
+        elseif(HASTY_IMPL_BLIS)
             set(BLA_VENDOR "BLIS")
-        elseif(HASTY_BLAS_C_OPENBLAS)
+        elseif(HASTY_IMPL_OPENBLAS)
             set(BLA_VENDOR "OpenBLAS")
-        elseif(HASTY_BLAS_C_MKL)
+        elseif(HASTY_IMPL_MKL)
             set(BLA_VENDOR "Intel10_64lp")
         endif()
 
 
-        if(HASTY_BLAS_C_BUILD_OPENBLAS)
+        if(HASTY_IMPL_BUILD_OPENBLAS)
 
             FetchContent_Declare(
                 openblas
@@ -129,8 +125,8 @@ macro(configure_blas)
             FetchContent_MakeAvailable(openblas)
 
             # Link
-            target_link_libraries(hasty_blas_c PUBLIC openblas)
-        elseif(HASTY_BLAS_C_GET_BLAS)
+            target_link_libraries(hasty_impl PUBLIC openblas)
+        elseif(HASTY_IMPL_GET_BLAS)
             download_openblas()
         else ()
             find_package(BLAS REQUIRED)
@@ -138,17 +134,17 @@ macro(configure_blas)
     endif()
 
     if (BLAS_FOUND)
-        message(STATUS "[ HASTY_BLAS_C ] Located BLAS at ${BLAS_LIBRARIES}")
+        message(STATUS "[ HASTY_IMPL ] Located BLAS at ${BLAS_LIBRARIES}")
 
         list(GET ${BLAS_LIBRARIES} 0 HASTY_BLAS_BLAS)
 
         if (NOT ${HASTY_BLAS_BLAS})
-            set(HASTY_BLAS_C_BLAS ${BLAS_LIBRARIES})
+            set(HASTY_IMPL_BLAS ${BLAS_LIBRARIES})
         endif ()
 
-        message(STATUS "[ HASTY_BLAS_C ] Using BLAS")
+        message(STATUS "[ HASTY_IMPL ] Using BLAS")
 
-        identify_blas("${HASTY_BLAS_C_BLAS}")
+        identify_blas("${HASTY_IMPL_BLAS}")
 
         # Configure BLAS (different steps are needed for each library)
         if (${BLAS_LIB} STREQUAL "OPENBLAS")
@@ -163,6 +159,6 @@ macro(configure_blas)
             link_generic()
         endif ()
     else ()
-        message(STATUS "[ HASTY_BLAS_C ] BLAS library not found on system. Consider enabling HASTY_BLAS_C_GET_BLAS")
+        message(STATUS "[ HASTY_IMPL ] BLAS library not found on system. Consider enabling HASTY_IMPL_GET_BLAS")
     endif ()
 endmacro()

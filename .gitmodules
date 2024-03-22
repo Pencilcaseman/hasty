@@ -1,0 +1,3 @@
+[submodule "hasty_impl/vendor/CLBlast"]
+	path = hasty_impl/vendor/CLBlast
+	url = https://github.com/CNugteren/CLBlast.git

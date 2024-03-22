@@ -3,6 +3,7 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::PathBuf;
 
+#[cfg(feature = "blas")]
 #[allow(unreachable_code)]
 fn cmake_blas_args() -> Option<(String, String)> {
     #[cfg(feature = "build_openblas")]
@@ -13,7 +14,7 @@ fn cmake_blas_args() -> Option<(String, String)> {
         std::io::stdout().flush().unwrap();
 
         return Some((
-            String::from("HASTY_BLAS_C_BUILD_OPENBLAS"),
+            String::from("HASTY_IMPL_BUILD_OPENBLAS"),
             String::from("ON"),
         ));
     }
@@ -25,76 +26,83 @@ fn cmake_blas_args() -> Option<(String, String)> {
         println!("cargo:warning=Using prebuilt OpenBLAS library");
         std::io::stdout().flush().unwrap();
 
-        return Some((String::from("HASTY_BLAS_C_GET_BLAS"), String::from("ON")));
+        return Some((String::from("HASTY_IMPL_GET_BLAS"), String::from("ON")));
     }
 
-    #[cfg(feature = "generic")]
+    #[cfg(feature = "blas_acml")]
     {
-        return Some((String::from("HASTY_BLAS_C_GENERIC"), String::from("ON")));
+        return Some((String::from("HASTY_IMPL_ACML"), String::from("ON")));
     }
 
-    #[cfg(feature = "acml")]
+    #[cfg(feature = "blas_accelerate")]
     {
-        return Some((String::from("HASTY_BLAS_C_ACML"), String::from("ON")));
+        return Some((String::from("HASTY_IMPL_ACCELERATE"), String::from("ON")));
     }
 
-    #[cfg(feature = "accelerate")]
+    #[cfg(feature = "blas_arm")]
     {
-        return Some((String::from("HASTY_BLAS_C_ACCELERATE"), String::from("ON")));
+        return Some((String::from("HASTY_IMPL_ARM"), String::from("ON")));
     }
 
-    #[cfg(feature = "arm")]
+    #[cfg(feature = "blas_atlas")]
     {
-        return Some((String::from("HASTY_BLAS_C_ARM"), String::from("ON")));
+        return Some((String::from("HASTY_IMPL_atlas"), String::from("ON")));
     }
 
-    #[cfg(feature = "atlas")]
+    #[cfg(feature = "blas_blis")]
     {
-        return Some((String::from("HASTY_BLAS_C_atlas"), String::from("ON")));
+        return Some((String::from("HASTY_IMPL_BLIS"), String::from("ON")));
     }
 
-    #[cfg(feature = "blis")]
+    #[cfg(feature = "blas_openblas")]
     {
-        return Some((String::from("HASTY_BLAS_C_BLIS"), String::from("ON")));
-    }
-
-    #[cfg(feature = "openblas")]
-    {
-        return Some((String::from("HASTY_BLAS_C_OPENBLAS"), String::from("ON")));
+        return Some((String::from("HASTY_IMPL_OPENBLAS"), String::from("ON")));
     }
 
     #[cfg(feature = "mkl")]
     {
-        return Some((String::from("HASTY_BLAS_C_MKL"), String::from("ON")));
+        return Some((String::from("HASTY_IMPL_MKL"), String::from("ON")));
     }
 
     None
 }
 
 fn main() {
-    let mut cmaker = cmake::Config::new("hasty_blas_c");
+    let mut cmaker = cmake::Config::new("hasty_impl");
 
-    if let Ok(path) = env::var("HASTY_BLAS_PATH") {
-        cmaker.define("HASTY_BLAS_PATH", path);
+    #[cfg(feature = "blas")]
+    {
+        cmaker.define("HASTY_USE_BLAS", "ON");
+
+        if let Ok(path) = env::var("HASTY_BLAS_PATH") {
+            cmaker.define("HASTY_BLAS_PATH", path);
+        }
+
+        // Define CMake arguments based on features
+        if let Some((key, value)) = cmake_blas_args() {
+            println!("Key: {key}, Value: {value}");
+            cmaker.define(key, value);
+        }
     }
 
-    // Define CMake arguments based on features
-    if let Some((key, value)) = cmake_blas_args() {
-        cmaker.define(key, value);
+    #[cfg(feature = "opencl")]
+    {
+        cmaker.define("HASTY_USE_OPENCL", "ON");
     }
 
     let dst = cmaker.build();
 
     println!("cargo:rustc-link-search=native={}/lib", dst.display());
-    println!("cargo:rustc-link-lib=static=hasty_blas_c");
+    println!("cargo:rustc-link-lib=static=hasty_impl");
 
     // Open the file
-    let file = File::open(format!("{}/build/blas_config.txt", dst.display()))
-        .expect("Failed to open blas_libraries.txt");
+    let file = File::open(format!("{}/build/library_config.txt", dst.display()))
+        .expect("Failed to open library_config.txt");
 
     // Create a buffered reader
     let reader = BufReader::new(file);
 
+    println!("cargo:rustc-link-lib=c++");
     // Iterate over each line in the file
     for line in reader.lines() {
         let line = line
@@ -105,6 +113,9 @@ fn main() {
         match line.as_str() {
             "accelerate" => {
                 println!("cargo:rustc-link-lib=framework=Accelerate");
+            }
+            "opencl" => {
+                println!("cargo:rustc-link-lib=framework=OpenCL");
             }
             _ => {
                 // Get path and filename
@@ -124,10 +135,26 @@ fn main() {
         }
     }
 
-    let bindings = bindgen::Builder::default()
-        .header("./hasty_blas_c/include/hasty_blas_c.h")
-        .header("./hasty_blas_c/include/level3/gemm.h")
-        .header("./hasty_blas_c/include/level2/gemv.h")
+    let mut builder = bindgen::Builder::default();
+
+    #[cfg(feature = "blas")]
+    {
+        builder = builder.header("./hasty_impl/include/helper/define_blas.h");
+    }
+
+    #[cfg(feature = "opencl")]
+    {
+        builder = builder.header("./hasty_impl/include/helper/define_opencl.h");
+    }
+
+    builder = builder.header("./hasty_impl/include/hasty_impl.h")
+        .header("./hasty_impl/include/hasty_blas.h")
+        .header("./hasty_impl/include/level2/gemv.h")
+        .header("./hasty_impl/include/level3/gemm.h")
+        .header("./hasty_impl/include/hasty_opencl.h")
+        .header("./hasty_impl/include/opencl/opencl_configure.h");
+
+    let bindings = builder
         .generate()
         .expect("Unable to generate bindings");
 
