@@ -29,19 +29,29 @@ jobs:
         run: |
           sudo apt-get install libopenblas-dev
 
-      - name: Compile and Test (Debug)
+      - name: Compile and Test (No Features) (Debug)
         run: |
-          cargo build
-          cargo test
+          cargo build --no-default-features
+          cargo test --no-default-features
 
-      - name: Compile and Test (Release)
+      - name: Compile and Test (BLAS) (Debug)
         run: |
-          cargo build --release
-          cargo test --release
+          cargo build --features "blas"
+          cargo test --features "blas"
+
+      - name: Compile and Test (No Features) (Release)
+        run: |
+          cargo build --no-default-features --release
+          cargo test --no-default-features --release
+
+      - name: Compile and Test (BLAS) (Release)
+        run: |
+          cargo build --features "blas" --release
+          cargo test --features "blas" --release
 
       - name: Benchmark
         run: |
-          cargo bench
+          cargo bench --features "blas"
 
       - name: Store Benchmark Results
         uses: actions/upload-artifact@v2

@@ -58,7 +58,7 @@ jobs:
 
       - name: Benchmark
         run: |
-          cargo bench
+          cargo bench --features "blas"
 
       - name: Store Benchmark Results
         uses: actions/upload-artifact@v2
