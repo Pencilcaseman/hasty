@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD 17)
 
 include(FetchContent)
 
+file(WRITE ${CMAKE_BINARY_DIR}/library_config.txt "")
+
 macro(write_library_config data)
     file(APPEND ${CMAKE_BINARY_DIR}/library_config.txt "${data}\n")
 endmacro()
