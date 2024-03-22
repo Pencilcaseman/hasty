@@ -47,9 +47,9 @@ mod bench_gemm {
                 |bench, &size| {
                     bench.iter(|| {
                         bench_gemm(
-                            black_box(size),
-                            black_box(size),
-                            black_box(size),
+                            crate::black_box(size),
+                            crate::black_box(size),
+                            crate::black_box(size),
                             &a,
                             &b,
                             &mut c,
