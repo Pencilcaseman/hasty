@@ -152,6 +152,7 @@ fn main() {
         .header("./hasty_impl/include/level2/gemv.h")
         .header("./hasty_impl/include/level3/gemm.h")
         .header("./hasty_impl/include/hasty_opencl.h")
+        .header("./hasty_impl/include/opencl/opencl_error_types.h")
         .header("./hasty_impl/include/opencl/opencl_configure.h");
 
     let bindings = builder

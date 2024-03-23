@@ -17,3 +17,5 @@ Cargo.lock
 
 hasty_impl/build
 hasty_impl/.idea
+
+**build-**

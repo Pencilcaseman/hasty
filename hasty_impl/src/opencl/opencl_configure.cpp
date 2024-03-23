@@ -16,7 +16,7 @@ extern "C" {
 struct OpenCLTestResult {
     bool pass;
     int64_t err;
-    std::string errStr;
+    OpenCLErrorCode errStr;
     std::string buildLog;
 };
 
@@ -58,7 +58,7 @@ c[i] = a[i] + b[i];
         if (buildStatus != CL_BUILD_SUCCESS) {
             return {false,
                     err,
-                    getOpenCLErrorString(err),
+                    getOpenCLErrorCode(err),
                     program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device)};
         }
 
@@ -83,12 +83,12 @@ c[i] = a[i] + b[i];
         queue.enqueueReadBuffer(bufC, CL_TRUE, 0, numElements * sizeof(float), dst.data());
 
         bool pass = dst == std::vector<float>({6, 6, 6, 6, 6});
-        return {pass, 0, "UNKNOWN_ERROR", ""};
+        return {pass, 0, OpenCLErrorCode::UnknownError, ""};
     } catch (const std::exception &e) {
         return {
                 false,
                 -1,
-                e.what(),
+                OpenCLErrorCode::UnknownError,
                 "UNKNOWN_ERROR",
         };
     }
