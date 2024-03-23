@@ -2,10 +2,12 @@
 
 #include "opencl/opencl_global.hpp"
 
-std::vector<cl::Device> openclDevices;
-cl::Device openCLDevice;
-cl::Context openCLContext;
-cl::CommandQueue openCLQueue;
+namespace global {
+    std::vector<cl::Device> openclDevices;
+    cl::Device openCLDevice;
+    cl::Context openCLContext;
+    cl::CommandQueue openCLQueue;
+}
 
 #else
 

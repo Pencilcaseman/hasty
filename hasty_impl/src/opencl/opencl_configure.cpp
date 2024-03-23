@@ -2,23 +2,11 @@
 
 #include <vector>
 #include <iostream>
-#include <map>
 #include "hasty_opencl.h"
 #include "opencl/opencl.hpp"
 #include "opencl/opencl_errors.hpp"
 #include "opencl/opencl_global.hpp"
 #include "clblast.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-struct OpenCLTestResult {
-    bool pass;
-    int64_t err;
-    OpenCLErrorCode errStr;
-    std::string buildLog;
-};
 
 int64_t openclDeviceCompute(const cl::Device &device) {
     cl_uint computeUnits = device.getInfo<CL_DEVICE_MAX_COMPUTE_UNITS>();
@@ -29,12 +17,12 @@ int64_t openclDeviceCompute(const cl::Device &device) {
 
     int64_t typeScore = (deviceType == CL_DEVICE_TYPE_GPU) ? 1000000 : 0;
     int64_t cudaScore = (vendorName.find("NVIDIA") != std::string::npos) ? 1000000 : 0;
-    int64_t memScore = globalMemSize / (1024 * 1024);
+    int64_t memScore = static_cast<int64_t>(globalMemSize) / (1024 * 1024);
 
     return static_cast<int64_t>(computeUnits * clockFreq) + typeScore + cudaScore + memScore;
 }
 
-OpenCLTestResult testOpenCLDevice(const cl::Device &device) {
+bool testOpenCLDevice(const cl::Device &device) {
     try {
         cl::Context context(device);
         cl::CommandQueue queue(context, device);
@@ -56,10 +44,7 @@ c[i] = a[i] + b[i];
         cl_build_status buildStatus = program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(device);
 
         if (buildStatus != CL_BUILD_SUCCESS) {
-            return {false,
-                    err,
-                    getOpenCLErrorCode(err),
-                    program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(device)};
+            return false;
         }
 
         std::vector<float> srcA = {1, 2, 3, 4, 5};
@@ -82,19 +67,13 @@ c[i] = a[i] + b[i];
         queue.enqueueNDRangeKernel(kernel, cl::NullRange, global_size, cl::NullRange);
         queue.enqueueReadBuffer(bufC, CL_TRUE, 0, numElements * sizeof(float), dst.data());
 
-        bool pass = dst == std::vector<float>({6, 6, 6, 6, 6});
-        return {pass, 0, OpenCLErrorCode::UnknownError, ""};
+        return dst == std::vector<float>({6, 6, 6, 6, 6});
     } catch (const std::exception &e) {
-        return {
-                false,
-                -1,
-                OpenCLErrorCode::UnknownError,
-                "UNKNOWN_ERROR",
-        };
+        return false;
     }
 }
 
-void updateOpenCLDevices(bool verbose) {
+void updateOpenCLDevices() {
     std::vector<cl::Platform> platforms;
     cl::Platform::get(&platforms);
 
@@ -102,38 +81,10 @@ void updateOpenCLDevices(bool verbose) {
         std::vector<cl::Device> devices;
         platform.getDevices(CL_DEVICE_TYPE_ALL, &devices);
         if (!devices.empty()) {
-            if (verbose) {
-                std::cout << "Platform: " << platform.getInfo<CL_PLATFORM_NAME>() << "\n";
-                std::cout << "  Vendor: " << platform.getInfo<CL_PLATFORM_VENDOR>() << "\n";
-                std::cout << "  Version: " << platform.getInfo<CL_PLATFORM_VERSION>() << "\n";
-            }
-
             for (auto &device: devices) {
                 // Test the device to check it works
-                auto [pass, err, errStr, buildLog] = testOpenCLDevice(device);
-                if (verbose) {
-                    std::cout << "  Device [id=" << openclDevices.size() << "]: "
-                              << device.getInfo<CL_DEVICE_NAME>()
-                              << (pass ? "" : " [ FAILED ]") << "\n";
-
-                    auto computeUnits = device.getInfo<CL_DEVICE_MAX_COMPUTE_UNITS>();
-                    auto clocFreq = device.getInfo<CL_DEVICE_MAX_CLOCK_FREQUENCY>();
-                    auto memory =
-                            (device.getInfo<CL_DEVICE_GLOBAL_MEM_SIZE>() + (1 << 30)) / (1 << 30);
-                    auto version = device.getInfo<CL_DEVICE_VERSION>();
-                    auto profile = device.getInfo<CL_DEVICE_PROFILE>();
-
-                    std::cout << "    Compute Units: " << computeUnits << "\n";
-                    std::cout << "    Clock:         " << clocFreq << "MHz\n";
-                    std::cout << "    Memory:        " << memory << "GB\n";
-                    std::cout << "    Version:       " << version << "\n";
-                    std::cout << "    Profile:       " << profile << "\n";
-                    std::cout << "    Compute Score: " << openclDeviceCompute(device) << "\n";
-                }
-
-                if (!pass) continue;
-
-                openclDevices.push_back(device);
+                if (!testOpenCLDevice(device)) continue;
+                global::openclDevices.push_back(device);
             }
         }
     }
@@ -142,7 +93,8 @@ void updateOpenCLDevices(bool verbose) {
 cl::Device findFastestDevice(const std::vector<cl::Device> &devices) {
     cl::Device fastest;
     int64_t fastestCompute = 0;
-    for (auto &device: devices) {
+
+    for (const auto &device: devices) {
         int64_t compute = openclDeviceCompute(device);
         if (compute > fastestCompute) {
             fastestCompute = compute;
@@ -152,35 +104,15 @@ cl::Device findFastestDevice(const std::vector<cl::Device> &devices) {
     return fastest;
 }
 
-void configureOpenCL(bool verbose, bool ask) {
-    if (verbose) {
-        std::cout << "============== OpenCL Configuration ==============\n";
-    }
+#ifdef __cplusplus
+extern "C" {
+#endif
+void configureOpenCL() {
+    updateOpenCLDevices();
 
-    updateOpenCLDevices(verbose);
-
-    if (!ask) {
-        // Select the fastest device by default
-        openCLDevice = findFastestDevice(openclDevices);
-    } else {
-        // Otherwise, prompt the user to select a device
-        int64_t deviceIndex = -1;
-        while (deviceIndex < 0 || deviceIndex >= int64_t(openclDevices.size())) {
-            std::cout << "Select OpenCL device [0-" << openclDevices.size() - 1 << "]: ";
-            std::cout << std::flush;
-            std::cin >> deviceIndex;
-        }
-
-        openCLDevice = openclDevices[deviceIndex];
-    }
-
-    if (verbose) {
-        std::string deviceDetails = "Selected Device: {}" + openCLDevice.getInfo<CL_DEVICE_NAME>();
-        std::cout << deviceDetails << "\n";
-    }
-
-    openCLContext = cl::Context(openCLDevice);
-    openCLQueue = cl::CommandQueue(openCLContext, openCLDevice);
+    global::openCLDevice = findFastestDevice(global::openclDevices);
+    global::openCLContext = cl::Context(global::openCLDevice);
+    global::openCLQueue = cl::CommandQueue(global::openCLContext, global::openCLDevice);
 }
 
 #ifdef __cplusplus

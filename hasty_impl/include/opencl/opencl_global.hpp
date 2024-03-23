@@ -4,10 +4,12 @@
 
 #include "opencl/opencl.hpp"
 
-extern std::vector<cl::Device> openclDevices;
-extern cl::Device openCLDevice;
-extern cl::Context openCLContext;
-extern cl::CommandQueue openCLQueue;
+namespace global {
+    extern std::vector<cl::Device> openclDevices;
+    extern cl::Device openCLDevice;
+    extern cl::Context openCLContext;
+    extern cl::CommandQueue openCLQueue;
+}
 
 #endif // HASTY_IMPL_HAS_OPENCL
 #endif // HASTY_IMPL_OPENCL_GLOBAL

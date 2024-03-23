@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-void configureOpenCL(bool verbose, bool ask);
+void configureOpenCL();
 
 #ifdef __cplusplus
 }

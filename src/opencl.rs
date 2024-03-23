@@ -155,8 +155,8 @@ impl OpenCLErrorCode {
 }
 
 /// Configure OpenCL -- Temporary function. This will be replaced soon
-pub fn configure_opencl(verbose: bool, ask: bool) {
+pub fn configure_opencl() {
     unsafe {
-        hasty_impl::configureOpenCL(verbose, ask);
+        hasty_impl::configureOpenCL();
     }
 }
