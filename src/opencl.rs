@@ -1,77 +1,217 @@
 use crate::hasty_impl;
 
+/// A collection of OpenCL error codes that can be returned.
+/// Note that this enum contains the `Success` variant -- this
+/// should be converted into `Result::Ok` or `Option::Some` when
+/// returned. Other variants should be converted into `Result::Err`
+/// or `Option::None` when returned.
 #[derive(Debug)]
 pub enum OpenCLErrorCode {
+    /// The operation completed successfully
     Success,
+
+    /// The specified device could not be found
     DeviceNotFound,
+
+    /// The specified device is not available
     DeviceNotAvailable,
+
+    /// The compiler is not available
     CompilerNotAvailable,
+
+    /// Memory allocation failed
     AllocationFailure,
+
+    /// The device is out of resources
     OutOfResources,
+
+    /// The host is out of memory
     OutOfHostMemory,
+
+    /// Profiling information is not available
     ProfilingInfoNotAvailable,
+
+    /// Two memcopy operations overlapped
     MemoryCopyOverlap,
+
+    /// The image format does not match the image format descriptor
     ImageFormatMismatch,
+
+    /// The image format is not supported
     ImageFormatNotSupported,
+
+    /// The program failed to build
+    /// **Note**: Contains the build log
     BuildProgramFailure(String),
+
+    /// Map operation failed
     MapFailure,
+
+    /// An invalid value was passed as an argument
     InvalidValue,
+
+    /// An invalid device type was passed
     InvalidDeviceType,
+
+    /// The current platform is invalid
     InvalidPlatform,
+
+    /// The specified device is invalid
     InvalidDevice,
+
+    /// The internal context is invalid (please report this error)
     InvalidContext,
+
+    /// The specified queue properties are invalid (please report this error)
     InvalidQueueProperties,
+
+    /// The specified command queue is invalid (please report this error)
     InvalidCommandQueue,
+
+    /// The specified host pointer is invalid (please report this error)
     InvalidHostPointer,
+
+    /// The specified memory object is invalid
     InvalidMemoryObject,
+
+    /// The image format descriptor is invalid
     InvalidImageFormatDescriptor,
+
+    /// The image size is invalid
     InvalidImageSize,
+
+    /// The binary is invalid
     InvalidBinary,
+
+    /// The build options are invalid
     InvalidBuildOptions,
+
+    /// The program is invalid
     InvalidProgram,
+
+    /// The program executable is invalid
     InvalidProgramExecutable,
+
+    /// The kernel name is invalid
     InvalidKernelName,
+
+    /// The kernel definition is invalid
     InvalidKernelDefinition,
+
+    /// The kernel is invalid
     InvalidKernel,
+
+    /// An argument's index is invalid
     InvalidArgIndex,
+
+    /// An argument's value is invalid
     InvalidArgValue,
+
+    /// An argument's size is invalid
     InvalidArgSize,
+
+    /// The kernel arguments are invalid
     InvalidKernelArgs,
+
+    /// An invalid work dimension was passed
     InvalidWorkDimension,
+
+    /// An invalid work group size was passed
     InvalidWorkGroupSize,
+
+    /// A work item with an invalid size was passed
     InvalidWorkItemSize,
+
+    /// An invalid global offset was used
     InvalidGlobalOffset,
+
+    /// An invalid event wait list was used
     InvalidEventWaitList,
+
+    /// An invalid event occurred
     InvalidEvent,
+
+    /// An invalid operation was performed
     InvalidOperation,
+
+    /// An invalid OpenGL object was used (please report this error)
     InvalidGLObject,
+
+    /// The buffer size is invalid
     InvalidBufferSize,
+
+    /// The mip level is invalid
     InvalidMipLevel,
+
+    /// The global work size is invalid
     InvalidGlobalWorkSize,
 
+    /// An unknown error occurred. This is a catch-all error and should
+    /// never be returned. If you see this, please double-check your code
+    /// and create an issue on the GitHub repository.
     UnknownError,
 
+    /// The requested routine is not implemented
     RoutineNotImplemented,
+
+    /// An invalid matrix was passed.
+    /// **Note**: Contains the invalid matrix (A, B, or C)
     InvalidMatrix(char),
+
+    /// An invalid vector was passed.
+    /// **Note**: Contains the invalid vector (X or Y)
     InvalidVector(char),
+
+    /// An invalid dimension was passed
     InvalidDimension,
+
+    /// An invalid leading dimension was passed.
+    /// **Note**: Contains the invalid leading dimension (A, B, or C)
     InvalidLD(char),
+
+    /// An invalid vector  increment was passed.
+    /// **Note**: Contains the invalid increment (X or Y)
     InvalidInc(char),
+
+    /// An invalid matrix buffer size was passed.
+    /// **Note**: Contains the invalid matrix buffer size (A, B, or C)
     InvalidMatrixBufferSize(char),
+
+    /// An invalid vector buffer size was passed.
+    /// **Note**: Contains the invalid vector buffer size (X or Y)
     InvalidVectorBufferSize(char),
+
+    /// The temporary GEMM buffer is too small. This is an internal error
     TempGemmBufferTooSmall,
+
+    /// Negative batch count was passed. Batch count must be positive
     BatchCountMustBePositive,
+
+    /// Trying to override parameters for an invalid kernel
     TryingToOverrideParametersForInvalidKernel,
+
+    /// Missing override parameters
     MissingOverrideParameters,
+
+    /// The device is out of memory
     DeviceOutOfMemory,
+
+    /// Half precision is not supported on the device
     HalfPrecisionNotSupported,
+
+    /// The unit-sized vector is invalid
     UnitSizedVectorInvalid,
+
+    /// The unit-sized vector is too small
     UnitSizedVectorTooSmall,
+
+    /// The device entry was not found
     DeviceEntryNotFound,
 }
 
 impl OpenCLErrorCode {
-    pub unsafe fn from_ffi(code: hasty_impl::OpenCLErrorCode) -> OpenCLErrorCode {
+    /// Convert from the FFI error code to the Rust error code
+    pub unsafe fn from_ffi(code: hasty_impl::OpenCLErrorCode) -> Self {
         match code {
             hasty_impl::OpenCLErrorCode_Success => OpenCLErrorCode::Success,
             hasty_impl::OpenCLErrorCode_DeviceNotFound => OpenCLErrorCode::DeviceNotFound,
