@@ -6,12 +6,6 @@ set(CMAKE_CXX_STANDARD 17)
 
 include(FetchContent)
 
-# If top level project, set default options
-if (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
-    set(HASTY_USE_BLAS ON CACHE BOOL "Use BLAS for matrix operations")
-    set(HASTY_USE_OPENCL ON CACHE BOOL "Use OpenCL for matrix operations")
-endif ()
-
 file(WRITE ${CMAKE_BINARY_DIR}/library_config.txt "")
 
 macro(write_library_config data)
