@@ -2,7 +2,7 @@
 #define HASTY_IMPL_OPENCL_GLOBAL
 #ifdef HASTY_IMPL_HAS_OPENCL
 
-#include <ocl/opencl.hpp>
+#include "./opencl.hpp"
 
 namespace global {
     extern std::vector<cl::Device> openclDevices;

@@ -3,9 +3,9 @@
 #include <vector>
 #include <iostream>
 #include <hasty_opencl.h>
-#include <ocl/opencl.hpp>
-#include <ocl/opencl_errors.hpp>
-#include <ocl/opencl_global.hpp>
+#include <opencl/opencl.hpp>
+#include <opencl/opencl_errors.hpp>
+#include <opencl/opencl_global.hpp>
 #include <clblast.h>
 
 int64_t openclDeviceCompute(const cl::Device &device) {
