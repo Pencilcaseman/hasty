@@ -2,11 +2,11 @@
 
 #include <vector>
 #include <iostream>
-#include "hasty_opencl.h"
-#include "opencl/opencl.hpp"
-#include "opencl/opencl_errors.hpp"
-#include "opencl/opencl_global.hpp"
-#include "clblast.h"
+#include <hasty_opencl.h>
+#include <ocl/opencl.hpp>
+#include <ocl/opencl_errors.hpp>
+#include <ocl/opencl_global.hpp>
+#include <clblast.h>
 
 int64_t openclDeviceCompute(const cl::Device &device) {
     cl_uint computeUnits = device.getInfo<CL_DEVICE_MAX_COMPUTE_UNITS>();

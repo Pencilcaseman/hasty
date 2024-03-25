@@ -1,6 +1,6 @@
 #ifdef HASTY_IMPL_HAS_OPENCL
 
-#include "opencl/opencl_global.hpp"
+#include <ocl/opencl_global.hpp>
 
 namespace global {
     std::vector<cl::Device> openclDevices;

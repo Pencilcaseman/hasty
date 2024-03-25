@@ -23,7 +23,7 @@ file(GLOB_RECURSE HASTY_IMPL_SOURCE
 )
 
 add_library(hasty_impl STATIC ${HASTY_IMPL_SOURCE}
-        include/opencl/opencl_memory.hpp
+        include/ocl/opencl_memory.hpp
         src/opencl/opencl_memory.cpp)
 
 target_include_directories(hasty_impl PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
@@ -84,6 +84,9 @@ if (HASTY_USE_OPENCL)
         endif ()
     endif ()
 endif ()
+
+message(STATUS "INCLUDE DIRECTORY: ${CMAKE_CURRENT_SOURCE_DIR}/include")
+target_include_directories(hasty_impl PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 # Install logic
 install(TARGETS hasty_impl DESTINATION lib)

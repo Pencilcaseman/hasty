@@ -1,6 +1,6 @@
 #ifdef HASTY_IMPL_HAS_OPENCL
 
-#include <opencl/opencl_memory.hpp>
+#include <ocl/opencl_memory.hpp>
 
 OpenCLErrorCode opencl_allocate(uint64_t bytes, OpenCLMemoryType mem_type, cl::Buffer **result) {
     cl_mem_flags converted_type = -1;

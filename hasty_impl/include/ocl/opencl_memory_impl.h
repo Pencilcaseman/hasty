@@ -4,7 +4,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-#include "opencl_error_types.h"
+#include <ocl/opencl_error_types.h>
 
 #ifdef __cplusplus
 extern "C" {

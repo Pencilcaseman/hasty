@@ -1,8 +1,8 @@
 #ifdef HASTY_IMPL_HAS_OPENCL
 
-#include "opencl/opencl.hpp"
-#include "clblast.h"
-#include "opencl/opencl_errors.hpp"
+#include <ocl/opencl.hpp>
+#include <clblast.h>
+#include <ocl/opencl_errors.hpp>
 #include <map>
 
 //const char *getOpenCLErrorString(int64_t error) {
