@@ -2,8 +2,6 @@
 #define HASTY_IMPL_CONFIGURE_OPENCL_HPP
 #ifdef HASTY_IMPL_HAS_OPENCL
 
-#include <stdbool.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif

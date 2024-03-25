@@ -38,3 +38,5 @@ cmake = "0.1"
 [[bench]]
 name = "bench_gemm"
 harness = false
+[dependencies]
+log = "0.4.21"

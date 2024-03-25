@@ -1,3 +1,4 @@
+use log::warn;
 use crate::hasty_impl;
 
 /// A collection of OpenCL error codes that can be returned.
@@ -209,6 +210,27 @@ pub enum OpenCLErrorCode {
     DeviceEntryNotFound,
 }
 
+/// Memory configuration options
+pub enum OpenCLMemoryType {
+    /// Memory can only be read from. Writing to this memory is undefined behaviour
+    ReadOnly,
+
+    /// Memory can only be written to. Reading from this memory is undefined behaviour
+    WriteOnly,
+
+    /// Memory can be read from or written to
+    ReadWrite,
+}
+
+/// Data transfer modes
+pub enum OpenCLMemCopyType {
+    /// Copy from host memory to device memory
+    HostToDevice,
+
+    /// Copy from device memory to host memory
+    DeviceToHost,
+}
+
 impl OpenCLErrorCode {
     /// Convert from the FFI error code to the Rust error code
     pub unsafe fn from_ffi(code: hasty_impl::OpenCLErrorCode) -> Self {
@@ -294,9 +316,67 @@ impl OpenCLErrorCode {
     }
 }
 
+impl OpenCLMemoryType {
+    /// Convert from the Rust memory type to the FFI memory type
+    pub unsafe fn to_ffi(&self) -> hasty_impl::OpenCLMemoryType {
+        match self {
+            OpenCLMemoryType::ReadOnly => hasty_impl::OpenCLMemoryType_ReadOnly,
+            OpenCLMemoryType::WriteOnly => hasty_impl::OpenCLMemoryType_WriteOnly,
+            OpenCLMemoryType::ReadWrite => hasty_impl::OpenCLMemoryType_ReadWrite,
+        }
+    }
+
+    /// Convert from the FFI memory type to the Rust memory type
+    pub unsafe fn from_ffi(mem_type: hasty_impl::OpenCLMemoryType) -> Self {
+        match mem_type {
+            hasty_impl::OpenCLMemoryType_ReadOnly => OpenCLMemoryType::ReadOnly,
+            hasty_impl::OpenCLMemoryType_WriteOnly => OpenCLMemoryType::WriteOnly,
+            hasty_impl::OpenCLMemoryType_ReadWrite => OpenCLMemoryType::ReadWrite,
+            _ => panic!("Invalid memory type"),
+        }
+    }
+}
+
 /// Configure OpenCL -- Temporary function. This will be replaced soon
-pub fn configure_opencl() {
+pub unsafe fn configure_opencl() {
     unsafe {
         hasty_impl::configureOpenCL();
+    }
+}
+
+/// Allocate memory on the OpenCL device
+pub unsafe fn opencl_allocate(bytes: usize, mem_type: OpenCLMemoryType) -> Result<*mut ::std::os::raw::c_void, OpenCLErrorCode> {
+    let mut buffer: *mut ::std::os::raw::c_void = ::std::ptr::null_mut();
+
+    let ret = hasty_impl::opencl_allocate_voidptr(bytes as u64, mem_type.to_ffi(), &mut buffer);
+
+    if ret == hasty_impl::OpenCLErrorCode_Success {
+        Ok(buffer)
+    } else {
+        Err(OpenCLErrorCode::from_ffi(ret))
+    }
+}
+
+pub unsafe fn opencl_free(buffer: *mut ::std::os::raw::c_void) {
+    hasty_impl::opencl_free_voidptr(buffer);
+}
+
+pub unsafe fn opencl_write(dst: *mut ::std::os::raw::c_void, src: *const ::std::os::raw::c_void, bytes: usize) -> Result<(), OpenCLErrorCode> {
+    let ret = hasty_impl::opencl_write_voidptr(dst, src, bytes as u64, true);
+
+    if ret == hasty_impl::OpenCLErrorCode_Success {
+        Ok(())
+    } else {
+        Err(OpenCLErrorCode::from_ffi(ret))
+    }
+}
+
+pub unsafe fn opencl_read(dst: *mut ::std::os::raw::c_void, src: *const ::std::os::raw::c_void, bytes: usize) -> Result<(), OpenCLErrorCode> {
+    let ret = hasty_impl::opencl_read_voidptr(dst, src, bytes as u64, true);
+
+    if ret == hasty_impl::OpenCLErrorCode_Success {
+        Ok(())
+    } else {
+        Err(OpenCLErrorCode::from_ffi(ret))
     }
 }

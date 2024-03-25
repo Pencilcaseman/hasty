@@ -6,7 +6,7 @@
 #include "clblast.h"
 #include "opencl/opencl_error_types.h"
 
-OpenCLErrorCode getOpenCLErrorCode(int64_t error);
+OpenCLErrorCode get_opencl_error_code(int64_t error);
 OpenCLErrorCode getCLBlastErrorCode(clblast::StatusCode status);
 
 #endif // HASTY_IMPL_HAS_OPENCL

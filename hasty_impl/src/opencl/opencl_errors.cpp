@@ -82,7 +82,7 @@
 //        return strings[64];
 //}
 
-OpenCLErrorCode getOpenCLErrorCode(int64_t error) {
+OpenCLErrorCode get_opencl_error_code(int64_t error) {
     // Error Codes
     static OpenCLErrorCode codes[] = {
             OpenCLErrorCode::Success,                        //   0

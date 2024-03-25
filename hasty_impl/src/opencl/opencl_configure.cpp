@@ -76,6 +76,7 @@ c[i] = a[i] + b[i];
 void updateOpenCLDevices() {
     std::vector<cl::Platform> platforms;
     cl::Platform::get(&platforms);
+    global::openclDevices.clear();
 
     for (const auto &platform: platforms) {
         std::vector<cl::Device> devices;
@@ -109,6 +110,11 @@ extern "C" {
 #endif
 void configureOpenCL() {
     updateOpenCLDevices();
+
+    if (global::openclDevices.empty()) {
+        std::cerr << "Failed to find an OpenCL-compatible device";
+        exit(1);
+    }
 
     global::openCLDevice = findFastestDevice(global::openclDevices);
     global::openCLContext = cl::Context(global::openCLDevice);
