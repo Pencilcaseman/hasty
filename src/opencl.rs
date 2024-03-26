@@ -1,4 +1,3 @@
-use log::warn;
 use crate::hasty_impl;
 
 /// A collection of OpenCL error codes that can be returned.
@@ -357,10 +356,19 @@ pub unsafe fn opencl_allocate(bytes: usize, mem_type: OpenCLMemoryType) -> Resul
     }
 }
 
+/// Free memory on the OpenCL device
+///
+/// **Note**: This function does not return an error code. If the memory
+/// could not be freed, it will panic (or segfault...). As a result, the function
+/// signature is `unsafe` -- the caller must ensure that the memory can be freed.
 pub unsafe fn opencl_free(buffer: *mut ::std::os::raw::c_void) {
     hasty_impl::opencl_free_voidptr(buffer);
 }
 
+/// Write data to the OpenCL device
+///
+/// **Note**: There are no checks on the pointers, nor the size of the data. The caller
+/// must ensure that everything is valid.
 pub unsafe fn opencl_write(dst: *mut ::std::os::raw::c_void, src: *const ::std::os::raw::c_void, bytes: usize) -> Result<(), OpenCLErrorCode> {
     let ret = hasty_impl::opencl_write_voidptr(dst, src, bytes as u64, true);
 
@@ -371,6 +379,10 @@ pub unsafe fn opencl_write(dst: *mut ::std::os::raw::c_void, src: *const ::std::
     }
 }
 
+/// Read data from the OpenCL device
+///
+/// **Note**: There are no checks on the pointers, nor the size of the data. The caller
+/// must ensure that everything is valid.
 pub unsafe fn opencl_read(dst: *mut ::std::os::raw::c_void, src: *const ::std::os::raw::c_void, bytes: usize) -> Result<(), OpenCLErrorCode> {
     let ret = hasty_impl::opencl_read_voidptr(dst, src, bytes as u64, true);
 
