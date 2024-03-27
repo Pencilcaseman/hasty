@@ -12,9 +12,11 @@ OpenCLErrorCode opencl_allocate(size_t bytes, OpenCLMemoryType mem_type, cl::Buf
 
 void opencl_free(cl::Buffer *buf);
 
-OpenCLErrorCode opencl_write(const cl::Buffer &dst, const void *src, size_t bytes, bool blocking);
+OpenCLErrorCode opencl_write(const cl::Buffer &dst, const void *src, size_t bytes);
 
-OpenCLErrorCode opencl_read(void *dst, const cl::Buffer &src, size_t bytes, bool blocking);
+OpenCLErrorCode opencl_read(void *dst, const cl::Buffer &src, size_t bytes);
+
+OpenCLErrorCode opencl_copy(cl::Buffer &dst, const cl::Buffer &src, size_t bytes);
 
 #endif // HASTY_IMPL_HAS_OPENCL
 #endif //HASTY_IMPL_OPENCL_MEMORY_HPP

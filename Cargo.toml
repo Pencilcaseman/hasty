@@ -27,6 +27,9 @@ blas_blis = ["blas"]       # BLIS/Flame Framework
 blas_openblas = ["blas"]   # OpenBLAS
 blas_mkl = ["blas"]        # Intel MKL
 
+blas_clblast = ["blas", "opencl"] # CLBlast (https://github.com/CNugteren/CLBlast)
+blas_cublas = ["blas", "cuda"]    # cuBLAS
+
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }
 num-traits = "0.2"

@@ -365,12 +365,12 @@ pub unsafe fn opencl_free(buffer: *mut ::std::os::raw::c_void) {
     hasty_impl::opencl_free_voidptr(buffer);
 }
 
-/// Write data to the OpenCL device
+/// Write data to OpenCL device memory from host memory
 ///
 /// **Note**: There are no checks on the pointers, nor the size of the data. The caller
 /// must ensure that everything is valid.
 pub unsafe fn opencl_write(dst: *mut ::std::os::raw::c_void, src: *const ::std::os::raw::c_void, bytes: usize) -> Result<(), OpenCLErrorCode> {
-    let ret = hasty_impl::opencl_write_voidptr(dst, src, bytes as u64, true);
+    let ret = hasty_impl::opencl_write_voidptr(dst, src, bytes as u64);
 
     if ret == hasty_impl::OpenCLErrorCode_Success {
         Ok(())
@@ -379,12 +379,12 @@ pub unsafe fn opencl_write(dst: *mut ::std::os::raw::c_void, src: *const ::std::
     }
 }
 
-/// Read data from the OpenCL device
+/// Read data from the OpenCL device into host memory
 ///
 /// **Note**: There are no checks on the pointers, nor the size of the data. The caller
 /// must ensure that everything is valid.
 pub unsafe fn opencl_read(dst: *mut ::std::os::raw::c_void, src: *const ::std::os::raw::c_void, bytes: usize) -> Result<(), OpenCLErrorCode> {
-    let ret = hasty_impl::opencl_read_voidptr(dst, src, bytes as u64, true);
+    let ret = hasty_impl::opencl_read_voidptr(dst, src, bytes as u64);
 
     if ret == hasty_impl::OpenCLErrorCode_Success {
         Ok(())
@@ -392,3 +392,18 @@ pub unsafe fn opencl_read(dst: *mut ::std::os::raw::c_void, src: *const ::std::o
         Err(OpenCLErrorCode::from_ffi(ret))
     }
 }
+
+/// Copy data from one OpenCL buffer to another
+///
+/// **Note**: There are no checks on the pointers, nor the size of the data. The caller
+/// must ensure that everything is valid.
+pub unsafe fn opencl_copy(dst: *mut ::std::os::raw::c_void, src: *const ::std::os::raw::c_void, bytes: usize) -> Result<(), OpenCLErrorCode> {
+    let ret = hasty_impl::opencl_copy_voidptr(dst, src, bytes as u64);
+
+    if ret == hasty_impl::OpenCLErrorCode_Success {
+        Ok(())
+    } else {
+        Err(OpenCLErrorCode::from_ffi(ret))
+    }
+}
+

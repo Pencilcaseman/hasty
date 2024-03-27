@@ -30,14 +30,22 @@ void opencl_free(cl::Buffer *buf) {
     delete buf;
 }
 
-OpenCLErrorCode opencl_write(const cl::Buffer &dst, const void *src, uint64_t bytes, bool blocking) {
+OpenCLErrorCode opencl_write(const cl::Buffer &dst, const void *src, uint64_t bytes) {
+    // We always block here, since we need the data to be available. At some point we might want to add the option
+    // for a non-blocking write, but that's pretty complicated to handle correctly.
     return get_opencl_error_code(
-            global::openCLQueue.enqueueWriteBuffer(dst, blocking ? CL_TRUE : CL_FALSE, 0, bytes, src));
+            global::openCLQueue.enqueueWriteBuffer(dst, CL_TRUE, 0, bytes, src));
 }
 
-OpenCLErrorCode opencl_read(void *dst, const cl::Buffer &src, uint64_t bytes, bool blocking) {
+OpenCLErrorCode opencl_read(void *dst, const cl::Buffer &src, uint64_t bytes) {
+    // We always block here, since we need the data to be available. At some point we might want to add the option
+        // for a non-blocking read, but that's pretty complicated to handle correctly.
     return get_opencl_error_code(
-            global::openCLQueue.enqueueReadBuffer(src, blocking ? CL_TRUE : CL_FALSE, 0, bytes, dst));
+            global::openCLQueue.enqueueReadBuffer(src, CL_TRUE, 0, bytes, dst));
+}
+
+OpenCLErrorCode opencl_copy(cl::Buffer &dst, const cl::Buffer &src, size_t bytes) {
+    return get_opencl_error_code(global::openCLQueue.enqueueCopyBuffer(src, dst, 0, 0, bytes));
 }
 
 #ifdef __cplusplus
@@ -52,12 +60,16 @@ void opencl_free_voidptr(void *buf) {
     delete (cl::Buffer *) buf;
 }
 
-OpenCLErrorCode opencl_write_voidptr(void *dst, const void *src, uint64_t bytes, bool blocking) {
-    return opencl_write(*(cl::Buffer *) dst, src, bytes, blocking);
+OpenCLErrorCode opencl_write_voidptr(void *dst, const void *src, uint64_t bytes) {
+    return opencl_write(*(cl::Buffer *) dst, src, bytes);
 }
 
-OpenCLErrorCode opencl_read_voidptr(void *dst, const void *src, uint64_t bytes, bool blocking) {
-    return opencl_read(dst, *(cl::Buffer *) src, bytes, blocking);
+OpenCLErrorCode opencl_read_voidptr(void *dst, const void *src, uint64_t bytes) {
+    return opencl_read(dst, *(cl::Buffer *) src, bytes);
+}
+
+OpenCLErrorCode opencl_copy_voidptr(void *dst, const void *src, uint64_t bytes) {
+    return opencl_copy(*(cl::Buffer *) dst, *(cl::Buffer *) src, bytes);
 }
 
 #ifdef __cplusplus

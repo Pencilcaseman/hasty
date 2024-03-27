@@ -25,11 +25,11 @@ enum OpenCLErrorCode opencl_allocate_voidptr(uint64_t bytes, enum OpenCLMemoryTy
 
 void opencl_free_voidptr(void *buf);
 
-enum OpenCLErrorCode
-opencl_write_voidptr(void *dst, const void *src, uint64_t bytes, bool blocking);
+enum OpenCLErrorCode opencl_write_voidptr(void *dst, const void *src, uint64_t bytes);
 
-enum OpenCLErrorCode
-opencl_read_voidptr(void *dst, const void *src, uint64_t bytes, bool blocking);
+enum OpenCLErrorCode opencl_read_voidptr(void *dst, const void *src, uint64_t bytes);
+
+enum OpenCLErrorCode opencl_copy_voidptr(void *dst, const void *src, uint64_t bytes);
 
 #ifdef __cplusplus
 }
