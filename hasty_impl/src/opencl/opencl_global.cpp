@@ -7,6 +7,8 @@ namespace global {
     cl::Device openCLDevice;
     cl::Context openCLContext;
     cl::CommandQueue openCLQueue;
+    cl::Program::Sources openCLSources;
+    cl::Program openCLProgram;
 }
 
 #else

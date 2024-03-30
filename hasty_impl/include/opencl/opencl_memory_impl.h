@@ -21,15 +21,15 @@ enum OpenCLMemCopyType {
     DeviceToHost
 };
 
-enum OpenCLErrorCode opencl_allocate_voidptr(uint64_t bytes, enum OpenCLMemoryType mem_type, void **ptr);
+enum OpenCLErrorCode opencl_allocate_ffi(uint64_t bytes, enum OpenCLMemoryType mem_type, void **ptr);
 
-void opencl_free_voidptr(void *buf);
+void opencl_free_ffi(void *buf);
 
-enum OpenCLErrorCode opencl_write_voidptr(void *dst, const void *src, uint64_t bytes);
+enum OpenCLErrorCode opencl_write_ffi(void *dst, const void *src, uint64_t bytes);
 
-enum OpenCLErrorCode opencl_read_voidptr(void *dst, const void *src, uint64_t bytes);
+enum OpenCLErrorCode opencl_read_ffi(void *dst, const void *src, uint64_t bytes);
 
-enum OpenCLErrorCode opencl_copy_voidptr(void *dst, const void *src, uint64_t bytes);
+enum OpenCLErrorCode opencl_copy_ffi(void *dst, const void *src, uint64_t bytes);
 
 #ifdef __cplusplus
 }

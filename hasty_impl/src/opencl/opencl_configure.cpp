@@ -43,7 +43,7 @@ c[i] = a[i] + b[i];
         // Check the build status
         cl_build_status buildStatus = program.getBuildInfo<CL_PROGRAM_BUILD_STATUS>(device);
 
-        if (buildStatus != CL_BUILD_SUCCESS) {
+        if (buildStatus != CL_BUILD_SUCCESS || err != CL_SUCCESS) {
             return false;
         }
 

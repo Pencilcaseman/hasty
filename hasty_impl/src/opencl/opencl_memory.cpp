@@ -52,23 +52,23 @@ OpenCLErrorCode opencl_copy(cl::Buffer &dst, const cl::Buffer &src, size_t bytes
 extern "C" {
 #endif
 
-OpenCLErrorCode opencl_allocate_voidptr(uint64_t bytes, OpenCLMemoryType mem_type, void **ptr) {
+OpenCLErrorCode opencl_allocate_ffi(uint64_t bytes, OpenCLMemoryType mem_type, void **ptr) {
     return opencl_allocate(bytes, mem_type, (cl::Buffer **) (ptr));
 }
 
-void opencl_free_voidptr(void *buf) {
+void opencl_free_ffi(void *buf) {
     delete (cl::Buffer *) buf;
 }
 
-OpenCLErrorCode opencl_write_voidptr(void *dst, const void *src, uint64_t bytes) {
+OpenCLErrorCode opencl_write_ffi(void *dst, const void *src, uint64_t bytes) {
     return opencl_write(*(cl::Buffer *) dst, src, bytes);
 }
 
-OpenCLErrorCode opencl_read_voidptr(void *dst, const void *src, uint64_t bytes) {
+OpenCLErrorCode opencl_read_ffi(void *dst, const void *src, uint64_t bytes) {
     return opencl_read(dst, *(cl::Buffer *) src, bytes);
 }
 
-OpenCLErrorCode opencl_copy_voidptr(void *dst, const void *src, uint64_t bytes) {
+OpenCLErrorCode opencl_copy_ffi(void *dst, const void *src, uint64_t bytes) {
     return opencl_copy(*(cl::Buffer *) dst, *(cl::Buffer *) src, bytes);
 }
 

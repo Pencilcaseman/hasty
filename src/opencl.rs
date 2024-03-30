@@ -347,12 +347,11 @@ pub unsafe fn configure_opencl() {
 pub unsafe fn opencl_allocate(bytes: usize, mem_type: OpenCLMemoryType) -> Result<*mut ::std::os::raw::c_void, OpenCLErrorCode> {
     let mut buffer: *mut ::std::os::raw::c_void = ::std::ptr::null_mut();
 
-    let ret = hasty_impl::opencl_allocate_voidptr(bytes as u64, mem_type.to_ffi(), &mut buffer);
+    let ret = hasty_impl::opencl_allocate_ffi(bytes as u64, mem_type.to_ffi(), &mut buffer);
 
-    if ret == hasty_impl::OpenCLErrorCode_Success {
-        Ok(buffer)
-    } else {
-        Err(OpenCLErrorCode::from_ffi(ret))
+    match ret {
+        hasty_impl::OpenCLErrorCode_Success => Ok(buffer),
+        _ => Err(OpenCLErrorCode::from_ffi(ret)),
     }
 }
 
@@ -362,7 +361,7 @@ pub unsafe fn opencl_allocate(bytes: usize, mem_type: OpenCLMemoryType) -> Resul
 /// could not be freed, it will panic (or segfault...). As a result, the function
 /// signature is `unsafe` -- the caller must ensure that the memory can be freed.
 pub unsafe fn opencl_free(buffer: *mut ::std::os::raw::c_void) {
-    hasty_impl::opencl_free_voidptr(buffer);
+    hasty_impl::opencl_free_ffi(buffer);
 }
 
 /// Write data to OpenCL device memory from host memory
@@ -370,12 +369,11 @@ pub unsafe fn opencl_free(buffer: *mut ::std::os::raw::c_void) {
 /// **Note**: There are no checks on the pointers, nor the size of the data. The caller
 /// must ensure that everything is valid.
 pub unsafe fn opencl_write(dst: *mut ::std::os::raw::c_void, src: *const ::std::os::raw::c_void, bytes: usize) -> Result<(), OpenCLErrorCode> {
-    let ret = hasty_impl::opencl_write_voidptr(dst, src, bytes as u64);
+    let ret = hasty_impl::opencl_write_ffi(dst, src, bytes as u64);
 
-    if ret == hasty_impl::OpenCLErrorCode_Success {
-        Ok(())
-    } else {
-        Err(OpenCLErrorCode::from_ffi(ret))
+    match ret {
+        hasty_impl::OpenCLErrorCode_Success => Ok(()),
+        _ => Err(OpenCLErrorCode::from_ffi(ret)),
     }
 }
 
@@ -384,12 +382,11 @@ pub unsafe fn opencl_write(dst: *mut ::std::os::raw::c_void, src: *const ::std::
 /// **Note**: There are no checks on the pointers, nor the size of the data. The caller
 /// must ensure that everything is valid.
 pub unsafe fn opencl_read(dst: *mut ::std::os::raw::c_void, src: *const ::std::os::raw::c_void, bytes: usize) -> Result<(), OpenCLErrorCode> {
-    let ret = hasty_impl::opencl_read_voidptr(dst, src, bytes as u64);
+    let ret = hasty_impl::opencl_read_ffi(dst, src, bytes as u64);
 
-    if ret == hasty_impl::OpenCLErrorCode_Success {
-        Ok(())
-    } else {
-        Err(OpenCLErrorCode::from_ffi(ret))
+    match ret {
+        hasty_impl::OpenCLErrorCode_Success => Ok(()),
+        _ => Err(OpenCLErrorCode::from_ffi(ret)),
     }
 }
 
@@ -398,12 +395,40 @@ pub unsafe fn opencl_read(dst: *mut ::std::os::raw::c_void, src: *const ::std::o
 /// **Note**: There are no checks on the pointers, nor the size of the data. The caller
 /// must ensure that everything is valid.
 pub unsafe fn opencl_copy(dst: *mut ::std::os::raw::c_void, src: *const ::std::os::raw::c_void, bytes: usize) -> Result<(), OpenCLErrorCode> {
-    let ret = hasty_impl::opencl_copy_voidptr(dst, src, bytes as u64);
+    let ret = hasty_impl::opencl_copy_ffi(dst, src, bytes as u64);
 
-    if ret == hasty_impl::OpenCLErrorCode_Success {
-        Ok(())
-    } else {
-        Err(OpenCLErrorCode::from_ffi(ret))
+    match ret {
+        hasty_impl::OpenCLErrorCode_Success => Ok(()),
+        _ => Err(OpenCLErrorCode::from_ffi(ret)),
     }
 }
 
+pub unsafe fn opencl_add_kernel(src: &str) -> Result<(), OpenCLErrorCode> {
+    let ret = hasty_impl::opencl_add_kernel_ffi(std::ffi::CString::new(src).expect("Failed to convert source code to CString").as_ptr());
+
+    match ret {
+        hasty_impl::OpenCLErrorCode_Success => Ok(()),
+        _ => Err(OpenCLErrorCode::from_ffi(ret)),
+    }
+}
+
+pub unsafe fn opencl_run_contiguous_linear_kernel_3(
+    kernel_name: &str,
+    num_elements: usize,
+    buf_0: *mut ::std::os::raw::c_void,
+    buf_1: *mut ::std::os::raw::c_void,
+    buf_2: *mut ::std::os::raw::c_void,
+) -> Result<(), OpenCLErrorCode> {
+    let ret = hasty_impl::opencl_run_contiguous_linear_kernel_3_ffi(
+        std::ffi::CString::new(kernel_name).expect("Failed to convert kernel name to CString").as_ptr(),
+        num_elements as u64,
+        buf_0,
+        buf_1,
+        buf_2,
+    );
+
+    match ret {
+        hasty_impl::OpenCLErrorCode_Success => Ok(()),
+        _ => Err(OpenCLErrorCode::from_ffi(ret)),
+    }
+}

@@ -9,6 +9,8 @@ namespace global {
     extern cl::Device openCLDevice;
     extern cl::Context openCLContext;
     extern cl::CommandQueue openCLQueue;
+    extern cl::Program::Sources openCLSources;
+    extern cl::Program openCLProgram;
 }
 
 #endif // HASTY_IMPL_HAS_OPENCL

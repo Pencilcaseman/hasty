@@ -147,15 +147,13 @@ fn main() {
         builder = builder.header("./hasty_impl/include/helper/define_opencl.h");
     }
 
-    builder = builder // .header("./hasty_impl/include/hasty_impl.h")
-        // .clang_arg("-I./hasty_impl/include")
-        // .header("./hasty_impl/include/hasty_blas.h")
+    builder = builder
         .header("./hasty_impl/include/level2/gemv.h")
         .header("./hasty_impl/include/level3/gemm.h")
-        // .header("./hasty_impl/include/hasty_opencl.h")
         .header("./hasty_impl/include/opencl/opencl_error_types.h")
         .header("./hasty_impl/include/opencl/opencl_configure.h")
-        .header("./hasty_impl/include/opencl/opencl_memory_impl.h");
+        .header("./hasty_impl/include/opencl/opencl_memory_impl.h")
+        .header("./hasty_impl/include/opencl/opencl_kernel_impl.h");
 
     let bindings = builder
         .generate()
